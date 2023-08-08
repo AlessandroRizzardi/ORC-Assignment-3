@@ -1,5 +1,5 @@
 '''
-NOT MODIFIED !!!
+MODIFIED update to be used in dqn algorithm!!!
 '''
 
 import tensorflow as tf
@@ -33,7 +33,7 @@ def get_critic(nx, nu):
 
     return model
 
-def update(xu_batch, cost_batch, xu_next_batch):
+def update(xu_batch, cost_batch, xu_next_batch, Q, Q_target):
     ''' Update the weights of the Q network using the specified batch of data '''
     # all inputs are tf tensors
     with tf.GradientTape() as tape:         
@@ -51,6 +51,7 @@ def update(xu_batch, cost_batch, xu_next_batch):
     Q_grad = tape.gradient(Q_loss, Q.trainable_variables)          
     # Update the critic backpropagating the gradients
     critic_optimizer.apply_gradients(zip(Q_grad, Q.trainable_variables))    
+
 
 nx = 2
 nu = 1
