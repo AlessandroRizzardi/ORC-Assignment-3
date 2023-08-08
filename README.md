@@ -4,6 +4,7 @@ Assignment 3 of the course Optimization-Based Robot Control
 ## Introduction
 
 The goal of this assignment is to implement the Deep Q-Learning algorithm with a simple continuous time (state-space) 1-pendulumn environment, using discrete control input space.
+The environment used for implementing this final project made use of Keras which is a framework built on top of TensorFlow.
 
 ## Setup the enviroment
 
