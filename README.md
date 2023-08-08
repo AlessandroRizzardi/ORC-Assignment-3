@@ -1,5 +1,5 @@
 # ORC-Assignment-3
-Assignment n°3 of the Course Optimization-Based Robot Control held by Andrea Del Prete during Academic Year 2022-2023 ([_Department of Industrial Engineering_](https://www.dii.unitn.it/) (DII)).
+Assignment n°3 of the Course Optimization-Based Robot Control held by [_Andrea Del Prete_](https://andreadelprete.github.io/) during Academic Year 2022-2023 ([_Department of Industrial Engineering_](https://www.dii.unitn.it/) (DII)).
 
 ## Introduction
 
