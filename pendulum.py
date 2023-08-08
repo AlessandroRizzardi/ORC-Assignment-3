@@ -46,7 +46,7 @@ class Pendulum:
     an object Visual (see above).    
     '''
 
-    def __init__(self, nbJoint=1, noise_stddev=0.0):
+    def __init__(self, nbJoint=1, vMax = 8.0, uMax = 2.0, noise_stddev=0.0):
         '''Create a Pinocchio model of a N-pendulum, with N the argument <nbJoint>.'''
         self.viewer     = Display()
         self.visuals    = []
@@ -60,8 +60,8 @@ class Pendulum:
         self.DT         = 5e-2   # Time step length
         self.NDT        = 1      # Number of Euler steps per integration (internal)
         self.Kf         = .10    # Friction coefficient
-        self.vmax       = 8.0    # Max velocity (clipped if larger)
-        self.umax       = 2.0    # Max torque   (clipped if larger)
+        self.vmax       = vMax    # Max velocity (clipped if larger)
+        self.umax       = uMax    # Max torque   (clipped if larger)
         self.withSinCos = False  # If true, state is [cos(q),sin(q),qdot], else [q,qdot]
 
     def createPendulum(self, nbJoint, rootId=0, prefix='', jointPlacement=None):
@@ -170,7 +170,8 @@ class Pendulum:
             pin.computeAllTerms(self.model,self.data,q,v)
             M   = self.data.M
             b   = self.data.nle
-            a   = inv(M)*(u-self.Kf*v-b)
+            a   = inv(M)*(u-self.Kf*v-b) # OR a = np.dot(inv(M),(u-self.Kf*v-b))
+
             a   = a.reshape(self.nv) + np.random.randn(self.nv)*self.noise_stddev
             self.a = a
 

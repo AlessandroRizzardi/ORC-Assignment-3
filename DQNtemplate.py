@@ -1,9 +1,13 @@
+'''
+NOT MODIFIED !!!
+'''
+
 import tensorflow as tf
 from tensorflow import keras
 import numpy as np
 from numpy.random import randint, uniform
-
 from tensorflow.python.ops.numpy_ops import np_config
+
 np_config.enable_numpy_behavior()
  
 def np2tf(y):
