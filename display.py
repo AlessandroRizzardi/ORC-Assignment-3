@@ -6,7 +6,7 @@ import subprocess
 import os
 import time
 
-# Example of a class Display that connect to Gepetto-viewer and implement a
+# Example of a class Display that connects to Gepetto-viewer and implement a
 # 'place' method to set the position/rotation of a 3D visual object in a scene.
 class Display():
     '''
@@ -15,7 +15,7 @@ class Display():
     '''
     def __init__(self,windowName = "pinocchio" ):
         '''
-        This function connect with the Gepetto-viewer server and open a window with the given name.
+        This function connects with the Gepetto-viewer server and open a window with the given name.
         If the window already exists, it is kept in the current state. Otherwise, the newly-created
         window is set up with a scene named 'world'.
         '''
