@@ -7,8 +7,8 @@ The goal of this assignment is to implement the Deep Q-Learning algorithm with a
 
 ## Folder organization
 * DQNtemplate.py: template for implementing the Deep-Q-Network
-* display.py: connect to geppetto-viewer or webbrowser
-* pendulumn.py: Create a continuous state simulation environment for a N-pendulum
-* dpendulumn.py: Describe continuous state pendulum environment with discrete control input (derived from pendulumn.py)
-* dqn.py: create a deep-q-network learning agent using the tensorflow library
-* main_dqn.py: main file for the dqn algorithm applied to a single pendulumn enviroment
+* display.py: connect to gepetto-viewer or webbrowser
+* pendulum.py: Create a continuous state simulation environment for a N-pendulum
+* dpendulum.py: Describe continuous state pendulum environment with discrete control input (derived from pendulumn.py)
+* dqn.py: create a Deep-Q-Network learning agent using the tensorflow library
+* main_dqn.py: main file for the dqn algorithm applied to a single pendulum environment
