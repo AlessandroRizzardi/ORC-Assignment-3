@@ -69,7 +69,7 @@ class Pendulum:
         colorred = [1.0,0.0,0.0,1.0]
 
         jointId = rootId
-        jointPlacement     = jointPlacement if jointPlacement!=None else pin.SE3.Identity()
+        jointPlacement     = jointPlacement if jointPlacement != None else pin.SE3.Identity()
         length = 1.0
         mass = length
         inertia = pin.Inertia(mass,
@@ -134,7 +134,7 @@ class Pendulum:
     def step(self, u):
         ''' Simulate one time step '''
         assert(len(u)==self.nu)
-        _,self.r = self.dynamics(self.x, u)
+        _, self.r = self.dynamics(self.x, u)
         return self.obs(self.x), self.r
 
     def obs(self, x):
