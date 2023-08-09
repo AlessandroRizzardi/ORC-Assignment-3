@@ -1,9 +1,10 @@
 import numpy as np
 import time
 from dpendulum import DPendulum
-from dqn import dqn, get_critic, action_selection, dyn_forNbigger_thanOne
+from dqn import dqn
 import matplotlib.pyplot as plt 
 import tensorflow as tf
+from auxiliary_func import *
 
 
 
@@ -44,68 +45,6 @@ def trajectories(time_vec, X_sim, U_sim, Cost_sim, env):
     plt.title ("Joint velocity")
 
 
-def compute_V_pi_from_Q(env, model, plot_discretization=30):
-    ''' Compute Value table and greedy policy pi from Q table. '''
-    
-    vMax = env.vMax
-    dq   = 2*np.pi/plot_discretization
-    dv   = 2*vMax/plot_discretization
-    nx   = env.state_size()
-    
-    V  = np.zeros((plot_discretization+1, plot_discretization+1))
-    pi = np.zeros((plot_discretization+1, plot_discretization+1))
-    x  = np.zeros((nx, plot_discretization+1))
-
-    x[0,:] = np.arange(-np.pi, np.pi + dq, dq)
-    x[1,:] = np.arange(-vMax, vMax + dv, dv)
-                       
-    for q in range(plot_discretization+1):
-        for v in range(plot_discretization+1):
-            xu      = np.reshape([x[0,q] * np.ones(model.nu), x[1,v] * np.ones(model.nu), np.arange(model.nu)], (nx + 1, model.nu))
-            V[q,v]  = np.min(model(xu.T))
-            pi[q,v] = env.d2cu(np.argmin(model(xu.T)))
-            
-    return x, V, pi
-
-
-''' ***** render_greedy_policy *****
-    Simulates the system using the policy I just computed:
-    render_greedy_policy initializes the pendulum with a random initial state and then
-    simulates it with the policy we computed
-'''
-def render_greedy_policy(env, model, target_model, gamma, x0=None, maxIter=90):
-    x0 = env.reset(x0)
-    x = x0
-    costToGo = 0.0
-    gamma_to_the_i = 1
-    
-    time.sleep(1) # to keep ???
-
-    # storing the histories over time of x, u and the cost in 3 lists
-    hist_x   = np.zeros([maxIter, env.state_size()])
-    hist_u   = []
-    hist_cst = []
-
-    for i in range(maxIter):
-        '''# selecting policy using ϵ-greedy strategy (ϵ-greedy policy)' or random innput'''     
-        u = action_selection(0, env, x, model, target_model)
-        
-        x, cost = dyn_forNbigger_thanOne(env, u)
-
-        costToGo += gamma_to_the_i * cost
-        gamma_to_the_i *= gamma
-
-        hist_x[i,:]  = np.concatenate(np.array([x]).T)
-        hist_u.append(env.d2cu(u))
-        hist_cst.append(cost)
-
-        env.render() # to keep????
-
-    print("Real cost-to-go of state x0,", x0, "=", costToGo)   
-
-    return hist_x, hist_u, hist_cst
-
-
 if __name__ == '__main__':
 
     
@@ -116,7 +55,7 @@ if __name__ == '__main__':
 
     ### --- Hyper paramaters
     NEPISODES               = 20                   # Number of training episodes
-    NPRINT                  = NEPISODES/10         # print something every NPRINT episodes
+    NPRINT                  = 1                    # print something every NPRINT episodes
     MAX_EPISODE_LENGTH      = 100                  # Max episode length
     DISCOUNT                = 0.99                 # Discount factor 
     PLOT                    = False                # Plot stuff if True
@@ -125,6 +64,7 @@ if __name__ == '__main__':
     
     NX                      = 2         # number of states
     NU                      = 1         # number of control inputs
+    
     # REPLAY_STEP           = 4       # TO KEEP ???
     NETWORK_UPDATE_STEP     = 100       # how many steps taken for updating w
     QVALUE_LEARNING_RATE    = 1e-3      # alpha coefficient of Q learning algorithm
@@ -143,9 +83,9 @@ if __name__ == '__main__':
 
     # Creation of the Deep Q-Network models (create critic and target NNs)
     model = get_critic(NX,NU)                                         # Q network
-    model_target = get_critic(NX,NU)                                  # Target network
-    model_target.set_weights(model.get_weights())
-    critic_optimizer = tf.keras.optimizers.Adam(QVALUE_LEARNING_RATE) # optimizer specifying the learning rates
+    target_model = get_critic(NX,NU)                                  # Target network
+    target_model.set_weights(model.get_weights())
+    optimizer = tf.keras.optimizers.Adam(QVALUE_LEARNING_RATE) # optimizer specifying the learning rates
     model.summary()
     
     if(FLAG == True):
@@ -153,8 +93,10 @@ if __name__ == '__main__':
         print("*** DEEP Q LEARNING ***")
         print("###############################################\n\n")
               
-        h_ctg = dqn(env, DISCOUNT, NEPISODES, MAX_EPISODE_LENGTH, exploration_prob, MIN_BUFFER, model, model_target, \
-                    BATCH_SIZE, min_exploration_prob, exploration_decreasing_decay, NETWORK_UPDATE_STEP, NPRINT, PLOT, critic_optimizer)
+        h_ctg = dqn(env, DISCOUNT, NEPISODES, MAX_EPISODE_LENGTH,\
+                    exploration_prob, model, target_model, MIN_BUFFER,\
+                    BATCH_SIZE, optimizer,NETWORK_UPDATE_STEP, min_exploration_prob ,\
+                    exploration_decreasing_decay , PLOT, NPRINT )
         plt.show()
    
      # save model and weights
@@ -185,7 +127,7 @@ if __name__ == '__main__':
         env.plot_policy(pi, x[0], x[1])
         print("Average/min/max Value:", np.mean(V), np.min(V), np.max(V))
 
-    hist_x, hist_u, hist_cost = render_greedy_policy(env, model, model_target, DISCOUNT, None, MAX_EPISODE_LENGTH)
+    hist_x, hist_u, hist_cost = render_greedy_policy(env, model, target_model, DISCOUNT, None, MAX_EPISODE_LENGTH)
     
             
     '''
@@ -203,7 +145,7 @@ if __name__ == '__main__':
     figure,axes = plt.subplots(4,1)
 
     ax = axes[0]
-    ax.plot(time, hist_cst)
+    ax.plot(time, hist_cost)
     ax.set_xlabel("Time [s]")
     ax.set_ylabel("Cost")
     ax.set_title('Cost history')
