@@ -1,0 +1,5 @@
+# escludo cartelle
+__pycache__
+
+#escludo file
+*.h5
