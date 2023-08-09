@@ -6,7 +6,7 @@ Assignment n°3 of the Course Optimization-Based Robot Control held by [_Andrea 
 The goal of this assignment is to implement the Deep Q-Learning algorithm with a simple continuous time (state-space) 1-pendulumn environment, using discrete control input space. The environment used for implementing this final project made use of [_Keras_](https://keras.io/) which is a framework built on top of [_TensorFlow_](https://www.tensorflow.org/).
 
 ## Folder organization
-* DQNtemplate.py: Template for implementing the Deep-Q-Network
+* DQNtemplate.py: Template containing some code for creating a Neural Network using the tensor flow library.
 * display.py    : Connects to gepetto-viewer or webbrowser
 * pendulum.py   : Creates a continuous state simulation environment for a N-pendulum
 * dpendulum.py  : Describes continuous state pendulum environment with discrete control input (derived from pendulum.py)
