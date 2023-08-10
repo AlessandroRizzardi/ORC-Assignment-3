@@ -10,10 +10,11 @@ import time
 from DQNtemplate import update
 import matplotlib.pyplot as plt
 from auxiliary_func import *
+from collections import deque
 np_config.enable_numpy_behavior()
       
 def dqn(env, gamma, nEpisodes, maxEpisodeLength, \
-        exploration_prob, model , target_model,min_buffer,\
+        exploration_prob, model , target_model, min_buffer,\
         minibatch_size,optimizer, network_update_step,min_exploration_prob,\
         exploration_decreasing_decay, PLOT=False, nprint = 1000):
     
@@ -37,9 +38,9 @@ def dqn(env, gamma, nEpisodes, maxEpisodeLength, \
     h_cost = []                                         # lists to keep track of cost and control input u (for plotting)
     hist_x           = np.zeros([maxEpisodeLength, env.state_size()]) # list to keep track of state x
     hist_u = np.zeros(maxEpisodeLength)
-    replay_buffer    = []                                             # # used for storing transitions and replaying experiences \ 
+    replay_buffer    = []                                      # # used for storing transitions and replaying experiences \ 
                                                                       # collected from interactions of the model with the environment
-
+    step_count = 0
     # for every episode
     for k in range(nEpisodes):
         
@@ -51,7 +52,6 @@ def dqn(env, gamma, nEpisodes, maxEpisodeLength, \
         start = time.time()  # time of each episode
         
         #  START EPISODE
-        step_count = 0
         for i in range(maxEpisodeLength):
             
             x = env.x # env state
@@ -59,8 +59,10 @@ def dqn(env, gamma, nEpisodes, maxEpisodeLength, \
             # selecting action
             u = action_selection(exploration_prob, env, x, model)
             
+            
             #computing a step of the system dynamics
             x_next, cost = dyn_forNbigger_thanOne(env, u)
+            
                 
             #saving a transition into the replay_buffer  list *** Records an experience ***
             transition = (x, u, cost, x_next) # Experience
@@ -74,21 +76,23 @@ def dqn(env, gamma, nEpisodes, maxEpisodeLength, \
                 minibatch = random.choices(replay_buffer, k = minibatch_size) 
                 x_batch, u_batch, cost_batch, x_next_batch = list(zip(*minibatch))  
                 
-                x_batch       = np.concatenate([x_batch], axis=1).T
-                u_batch       = np.asarray(u_batch)
-                xu_batch      = np.reshape(np.append(x_batch, u_batch), (env.state_size() + 1, minibatch_size))
-                u_next_batch  = []
-                
+                u_batch = np.array(u_batch)
+                x_batch =  np.concatenate(x_batch,axis=1)
+                xu_batch = np.append(x_batch, [u_batch],axis=0)
+
+                u_next_batch  = np.zeros(minibatch_size)
                 # we now select the next action
                 for j in range(minibatch_size):
-                    u_next = action_selection(exploration_prob, env, x_next_batch[j], target_model, False)
-                    u_next_batch.append(u_next)
+                    u_next = action_selection(exploration_prob, env, x_next_batch[j], target_model, eps_greedy=False)
+                    u_next_batch[j] = u_next
                     
                 # merge state and action of next step
-                x_next_batch  = np.concatenate([x_next_batch], axis = 1).T
-                xu_next_batch = np.reshape(np.append(x_next_batch, u_next_batch), (env.state_size() + 1, minibatch_size))
-                cost_batch    = np.asarray(cost_batch)
-                cost_batch    = np.reshape(cost_batch, (1,minibatch_size))
+                x_next_batch  = np.concatenate(x_next_batch, axis = 1)
+                xu_next_batch = np.append(x_next_batch, [u_next_batch],axis=0)
+                
+                
+                cost_batch    = np.array(cost_batch)
+                cost_batch = np.reshape(cost_batch,(minibatch_size))
                 '''*** END Batch Sample step ***'''
                 
                 # CONVERSION From numpy array type to tensorflow tensor type
@@ -102,7 +106,7 @@ def dqn(env, gamma, nEpisodes, maxEpisodeLength, \
                 
                 # we update periodically the target model (Q_target) weights every 
                 # or with a period of 'network_update_step' steps
-                if(step_count % network_update_step == 0): 
+                if(k % network_update_step == 0): 
                     target_model.set_weights(model.get_weights())  # Update the current Q_target with the weight of Q
                 ''' ***** END Update step (optimizer with SGD) ***** '''
             
@@ -110,6 +114,7 @@ def dqn(env, gamma, nEpisodes, maxEpisodeLength, \
             
             #keep track of the cost to go
             J += gamma_to_the_i * cost #cost-to-go
+            #print("Cost: " ,cost, "J: " ,J )
             gamma_to_the_i *= gamma
 
         # END EPISODE 
@@ -122,21 +127,6 @@ def dqn(env, gamma, nEpisodes, maxEpisodeLength, \
 
         if not k % nprint:
             print('Episode #%d done with cost %d and %.1f exploration prob' % (k, J, 100*exploration_prob))            
-
-
-        # use the function compute_V_pi_from_Q(env, Q) to compute and plot V and pi
-#        if(k % nprint == 0):
-#            print("Deep Q learning - Episode %d duration %.1f [s], Eps = %.1f, J = %.1f " % (k, elapsed_time, round(100*exploration_prob, 3), J) )
-#            if(PLOT):
-#                x, V, pi = compute_V_pi_from_Q(env, model, 20)
-#                env.plot_V_table(V, x[0], x[1])
-#                env.plot_policy(pi, x[0], x[1])
-#                plt.show()
-#                if(k == nprint):
-#                    hist_x, hist_u, h_ctg = render_greedy_policy(env, model, target_model, 0, None, maxEpisodeLength)
-#                    time_vec = np.linspace(0.0, maxEpisodeLength * env.pendulum.DT, maxEpisodeLength)
-#                    # plot_traj(time_vec, hist_x, hist_u, h_ctg, env) DA METTERE A POSTO !!!
-#                    plt.show()
-                
+           
     return h_cost
 

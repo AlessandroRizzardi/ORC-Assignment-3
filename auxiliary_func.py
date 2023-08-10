@@ -20,8 +20,7 @@ def action_selection(exploration_prob, env, x, model, eps_greedy=True): # action
     if(np.random.uniform() < exploration_prob and eps_greedy):
         u  = np.random.randint(0, env.nu)
     else: # otherwise take a greedy control
-        x  = np.array([x]).T
-        xu = np.reshape([np.append([x] * np.ones(env.nu), [np.arange(env.nu)])], (env.state_size() + 1, env.nu)) 
+        xu = np.append(x*np.ones(env.nu),[np.arange(env.nu)],axis=0)
         u  = np.argmin(model(xu.T))
     return u
 ''' *** END AUXILIARY FUNCTION (2) *** '''
@@ -36,7 +35,7 @@ def update(xu_batch, cost_batch, xu_next_batch, Q, Q_target,DISCOUNT,optimizer):
         # Tensors can be manually watched by invoking the watch method on this context manager.
         target_values = Q_target(xu_next_batch, training=True)   
         # Compute 1-step targets for the critic loss
-        y = cost_batch + DISCOUNT*target_values                            
+        y = cost_batch + DISCOUNT*target_values                       
         # Compute batch of Values associated to the sampled batch of states
         Q_value = Q(xu_batch, training=True)                         
         # Critic's loss function. tf.math.reduce_mean() computes the mean of elements across dimensions of a tensor
@@ -78,7 +77,7 @@ def compute_V_pi_from_Q(env, model, plot_discretization=30):
                        
     for q in range(plot_discretization+1):
         for v in range(plot_discretization+1):
-            xu      = np.reshape([x[0,q] * np.ones(model.nu), x[1,v] * np.ones(model.nu), np.arange(model.nu)], (nx + 1, model.nu))
+            xu      = np.reshape([x[0,q] * np.ones(env.nu), x[1,v] * np.ones(env.nu), np.arange(env.nu)], (nx + 1, env.nu))
             V[q,v]  = np.min(model(xu.T))
             pi[q,v] = env.d2cu(np.argmin(model(xu.T)))
             
@@ -88,7 +87,7 @@ def compute_V_pi_from_Q(env, model, plot_discretization=30):
 '''*** AUXILIARY FUNCTION (7)***'''
 def get_critic(nx, nu): 
     ''' Create the neural network to represent the Q function '''
-    inputs = keras.layers.Input(shape=(nx+nu,1))
+    inputs = keras.layers.Input(shape=(nx+nu,))
     state_out1 = keras.layers.Dense(16, activation="relu")(inputs)     # hidden layer 1
     state_out2 = keras.layers.Dense(32, activation="relu")(state_out1) # hidden layer 2
     state_out3 = keras.layers.Dense(64, activation="relu")(state_out2) # hidden layer 3
@@ -117,7 +116,7 @@ def render_greedy_policy(env, model, target_model, gamma, x0=None, maxIter=90):
     # storing the histories over time of x, u and the cost in 3 lists
     hist_x   = np.zeros([maxIter, env.state_size()])
     hist_u   = []
-    hist_cst = []
+    hist_cost = []
 
     for i in range(maxIter):
         '''# selecting policy using ϵ-greedy strategy (ϵ-greedy policy)' or random innput'''     
@@ -128,14 +127,14 @@ def render_greedy_policy(env, model, target_model, gamma, x0=None, maxIter=90):
         costToGo += gamma_to_the_i * cost
         gamma_to_the_i *= gamma
 
-        hist_x[i,:]  = np.concatenate(np.array([x]).T)
+        hist_x[i,:]  = np.concatenate(x,axis=1).T
         hist_u.append(env.d2cu(u))
-        hist_cst.append(cost)
+        hist_cost.append(cost)
 
         env.render() 
 
     print("Real cost-to-go of state x0,", x0, "=", costToGo)   
 
-    return hist_x, hist_u, hist_cst
+    return hist_x, hist_u, hist_cost
 
 '''*** END AUXILIARY FUNCTION (8)***'''

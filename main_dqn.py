@@ -54,7 +54,7 @@ if __name__ == '__main__':
     np.random.seed(RANDOM_SEED)
 
     ### --- Hyper paramaters
-    NEPISODES               = 20                   # Number of training episodes
+    NEPISODES               = 50                # Number of training episodes
     NPRINT                  = 1                    # print something every NPRINT episodes
     MAX_EPISODE_LENGTH      = 100                  # Max episode length
     DISCOUNT                = 0.99                 # Discount factor 
@@ -66,7 +66,7 @@ if __name__ == '__main__':
     NU                      = 1         # number of control inputs
     
     # REPLAY_STEP           = 4       # TO KEEP ???
-    NETWORK_UPDATE_STEP     = 100       # how many steps taken for updating w
+    NETWORK_UPDATE_STEP     = 100      # how many steps taken for updating w
     QVALUE_LEARNING_RATE    = 1e-3      # alpha coefficient of Q learning algorithm
     exploration_prob                = 1     # initial exploration probability of eps-greedy policy
     exploration_decreasing_decay    = 0.05  # exploration decay for exponential decreasing
@@ -75,7 +75,7 @@ if __name__ == '__main__':
     ### --- Pendulum Environment
     nbJoint = 1                # joints number
     nx = 41                     # number of discretization steops for the state
-    nu = 41                    # number of discretization steps for the torque u
+    nu = 21                    # number of discretization steps for the torque u
     
     # ----- FLAG to TRAIN/LOAD
     FLAG                         = True # False = Load Model
@@ -86,19 +86,23 @@ if __name__ == '__main__':
     target_model = get_critic(NX,NU)                                  # Target network
     target_model.set_weights(model.get_weights())
     optimizer = tf.keras.optimizers.Adam(QVALUE_LEARNING_RATE) # optimizer specifying the learning rates
-    model.summary()
+    #model.summary()
     
     if(FLAG == True):
         print("\n\n\n###############################################")
         print("*** DEEP Q LEARNING ***")
         print("###############################################\n\n")
-              
+
+        start = time.time()  
         h_ctg = dqn(env, DISCOUNT, NEPISODES, MAX_EPISODE_LENGTH,\
                     exploration_prob, model, target_model, MIN_BUFFER,\
                     BATCH_SIZE, optimizer,NETWORK_UPDATE_STEP, min_exploration_prob ,\
                     exploration_decreasing_decay , PLOT, NPRINT )
-        plt.show()
-   
+        end = time.time()
+        Time = round((end-start)/60,3)
+        print("Training time:",Time)
+        #plt.show()
+        
      # save model and weights
         print("\nTraining finished")
         print("\nSave NN weights to file (in HDF5)")

@@ -125,7 +125,8 @@ class Pendulum:
         if x0 is None: 
             q0 = np.pi*(np.random.rand(self.nq)*2-1)
             v0 = np.random.rand(self.nv)*2-1
-            x0 = np.vstack([q0,v0])
+            x0 = np.vstack([q0,v0])             # [q,dq] [[q]
+            #                                            ,[dq]]
         assert len(x0)==self.nx
         self.x = x0.copy()
         self.r = 0.0
@@ -170,14 +171,14 @@ class Pendulum:
             pin.computeAllTerms(self.model,self.data,q,v)
             M   = self.data.M
             b   = self.data.nle
-            a   = inv(M)*(u-self.Kf*v-b) # OR a = np.dot(inv(M),(u-self.Kf*v-b))
+            a = np.dot(inv(M),(u-self.Kf*v-b))
 
             a   = a.reshape(self.nv) + np.random.randn(self.nv)*self.noise_stddev
             self.a = a
 
             q    += (v+0.5*DT*a)*DT
             v    += a*DT
-            cost += (3*sumsq(q) + 1e-1*sumsq(v) + 1e-3*sumsq(u))*DT # cost function
+            cost += (sumsq(q) + 1e-1*sumsq(v) + 1e-3*sumsq(u))*DT # cost function
 
             if display:
                 self.display(q)
