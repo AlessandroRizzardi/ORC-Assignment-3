@@ -3,3 +3,4 @@ __pycache__
 
 #escludo file
 *.h5
+DQNtemplate.py
