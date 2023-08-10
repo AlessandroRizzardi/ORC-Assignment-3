@@ -71,10 +71,10 @@ def dqn(env, gamma, nEpisodes, maxEpisodeLength, \
                 minibatch = random.choices(replay_buffer, k = minibatch_size) 
                 x_batch, u_batch, cost_batch, x_next_batch = list(zip(*minibatch))  
                 
-                x_batch       = np.concatenate([x_batch], axis=1).T
-                u_batch       = np.asarray(u_batch)
-                xu_batch      = np.reshape(np.append(x_batch, u_batch), (env.state_size() + 1, minibatch_size))
-                u_next_batch  = []
+                x_batch       = np.concatenate(x_batch, axis=1)
+                u_batch       = np.array(u_batch)
+                xu_batch      = np.append(x_batch, [u_batch], axis = 0)
+                u_next_batch  = np.zeros(minibatch_size)
                 
                 # we now select the next action
                 for j in range(minibatch_size):
@@ -82,9 +82,9 @@ def dqn(env, gamma, nEpisodes, maxEpisodeLength, \
                     u_next_batch.append(u_next)
                     
                 # merge state and action of next step
-                x_next_batch  = np.concatenate([x_next_batch], axis = 1).T
-                xu_next_batch = np.reshape(np.append(x_next_batch, u_next_batch), (env.state_size() + 1, minibatch_size))
-                cost_batch    = np.asarray(cost_batch)
+                x_next_batch  = np.concatenate(x_next_batch, axis = 1)
+                xu_next_batch = np.append(x_next_batch, [u_next_batch], axis = 0)
+                cost_batch    = np.array(cost_batch)
                 cost_batch    = np.reshape(cost_batch, (minibatch_size))
                 '''*** END Batch Sample step ***'''
                 
@@ -134,6 +134,6 @@ def dqn(env, gamma, nEpisodes, maxEpisodeLength, \
                 x, V, pi = compute_V_pi_from_Q(env, model, 20)
                 env.plot_V_table(V, x[0], x[1])
                 env.plot_policy(pi, x[0], x[1])
-                print("Average/min/max Value:", np.mean(V), np.min(V), np.max(V))
+                print("Average/min/max Value:", np.mean(V), np.min(V), np.max(V)) # used to describe how far i am from the optimal policy and optimal value function using Deep Q learning
     return hist_cost
 
