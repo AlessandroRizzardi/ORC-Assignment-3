@@ -125,7 +125,7 @@ class Pendulum:
         if x0 is None: 
             q0 = np.pi*(np.random.rand(self.nq)*2-1)
             v0 = np.random.rand(self.nv)*2-1
-            x0 = np.vstack([q0,v0])             # [q,dq] [[q]
+            x0 = np.vstack([q0,v0])             #        [[q]
             #                                            ,[dq]]
         assert len(x0)==self.nx
         self.x = x0.copy()

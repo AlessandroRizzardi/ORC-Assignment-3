@@ -56,10 +56,8 @@ def dqn(env, gamma, nEpisodes, maxEpisodeLength, \
             u = action_selection(exploration_prob, env, x, model)
             
             #computing a step of the system dynamics
-
             x_next, cost = dyn_forNbigger_thanOne(env, u)
             
-                
             #saving a transition into the replay_buffer  list *** Records an experience ***
             transition = (x, u, cost, x_next) # Experience
             replay_buffer.append(transition)
@@ -102,7 +100,7 @@ def dqn(env, gamma, nEpisodes, maxEpisodeLength, \
                 
                 # we update periodically the target model (Q_target) weights every 
                 # or with a period of 'network_update_step' steps
-                if(k % network_update_step == 0): 
+                if(step_count % network_update_step == 0): 
                     target_model.set_weights(model.get_weights())  # Update the current Q_target with the weight of Q
                 ''' ***** END Update step (optimizer with SGD) ***** '''
             
@@ -110,7 +108,6 @@ def dqn(env, gamma, nEpisodes, maxEpisodeLength, \
             
             #keep track of the cost to go
             J += gamma_to_the_i * cost #cost-to-go
-            #print("Cost: " ,cost, "J: " ,J 
             gamma_to_the_i *= gamma
 
         # END EPISODE 
@@ -119,18 +116,13 @@ def dqn(env, gamma, nEpisodes, maxEpisodeLength, \
         # update the exploration probability with an exponential decay: 
         # eps = exp(-decay*episode)
         exploration_prob = max(min_exploration_prob, np.exp(-exploration_decreasing_decay * k))
-        elapsed_time = round((time.time() - start), 3)            
+        elapsed_time = round((time.time() - start), 3)  
 
-        # use the function compute_V_pi_from_Q(env, Q) to compute and plot V and pi
+        #use the function compute_V_pi_from_Q(env, Q) to compute and plot V and pi
         if(k % nprint == 0):
-            # printing the training for each episode
-            print("Deep Q learning - Episode %d duration %.1f [s], Eps = %.1f, J = %.1f " % (k, elapsed_time, round(100*exploration_prob, 3), J) )
-            if(k >= nprint):
-                hist_x, hist_u, hist_cost = render_greedy_policy(env, model, 0, None, maxEpisodeLength)
-                if(PLOT):
-                    time_vec = np.linspace(0.0, maxEpisodeLength * env.pendulum.DT, maxEpisodeLength)
-                    trajectories(time_vec, hist_x, hist_u, hist_cost, env)
-                    plt.show()
+        #     printing the training for each episode
+            print("Deep Q learning - Episode %d duration %.1f [s], Eps = %.1f, J = %.1f " % (k, elapsed_time, round(100*exploration_prob, 3), J) )  
+            
             if(PLOT and env.nbJoint == 1):
                 x, V, pi = compute_V_pi_from_Q(env, model, 20)
                 env.plot_V_table(V, x[0], x[1])

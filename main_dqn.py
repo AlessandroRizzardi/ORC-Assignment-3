@@ -12,13 +12,13 @@ if __name__ == '__main__':
     np.random.seed(RANDOM_SEED)
 
     ### --- Hyper paramaters
-    NEPISODES               = 50                # Number of training episodes
+    NEPISODES               = 50               # Number of training episodes
 
-    NPRINT                  = 1                    # print something every NPRINT episodes
+    NPRINT                  = 5                   # print something every NPRINT episodes
     MAX_EPISODE_LENGTH      = 100                  # Max episode length
     DISCOUNT                = 0.99                 # Discount factor 
     PLOT                    = True                 # Plot stuff if True
-    PLOT_TRAJ               = False                # Plot trajectories of state x and control input u together with the history of the cost
+    PLOT_TRAJ               = True                # Plot trajectories of state x and control input u together with the history of the cost
     BATCH_SIZE              = 32                   # size of the batch for replay buffer
     MIN_BUFFER              = 100                  # lower bound as start for sampling from buffer
     
@@ -36,7 +36,7 @@ if __name__ == '__main__':
     
     ### --- Pendulum Environment
     nbJoint = 1                # joints number
-    nx = 41                     # number of discretization steops for the state
+    state_discretization_plot = 41                     # number of discretization steops for the state
     nu = 21                    # number of discretization steps for the torque u
     
     # ----- FLAG to TRAIN/LOAD
@@ -70,6 +70,15 @@ if __name__ == '__main__':
         Time = round((end-start)/60,3)
         print("Training time:",Time)
 
+        x,V,pi = compute_V_pi_from_Q(env, model, 20)
+        env.plot_V_table(V,x[0],x[1])
+        env.plot_policy(pi,x[0],x[1])
+
+        #plot cost
+        plt.figure()
+        plt.plot(np.cumsum(h_ctg) / range(1, NEPISODES + 1))
+        plt.title ("Average cost-to-go")
+        plt.show()
 
         
 
@@ -83,10 +92,6 @@ if __name__ == '__main__':
             model.save('saved_models/Model2')
             model.save_weights('saved_models/weight2.h5')
 
-        #plot cost
-        plt.figure()
-        plt.plot(np.cumsum(h_ctg) / range(1, NEPISODES + 1))
-        plt.title ("Average cost-to-go")
 
     if(TRAINING == False): #load model
         print("\n\n\n###############################################")
@@ -102,6 +107,9 @@ if __name__ == '__main__':
           
     hist_x, hist_u, hist_cost = render_greedy_policy(env, model, DISCOUNT, None, MAX_EPISODE_LENGTH)
     
+    for i in range(10):
+            render_greedy_policy(env, model, DISCOUNT, None, MAX_EPISODE_LENGTH)
+
     if(PLOT_TRAJ):
         time_vec = np.linspace(0.0, MAX_EPISODE_LENGTH * env.pendulum.DT, MAX_EPISODE_LENGTH)
         trajectories(time_vec, hist_x, hist_u, hist_cost, env)
