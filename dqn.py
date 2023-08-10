@@ -31,8 +31,6 @@ def dqn(env, gamma, nEpisodes, maxEpisodeLength, \
         
 
     hist_cost = []                                         # lists to keep track of cost and control input u (for plotting)
-    hist_x = np.zeros([maxEpisodeLength, env.state_size()]) # list to keep track of state x
-    hist_u = np.zeros(maxEpisodeLength)
     replay_buffer = []                                      # # used for storing transitions and replaying experiences \ 
                                                                       # collected from interactions of the model with the environment
     step_count = 0
@@ -70,21 +68,20 @@ def dqn(env, gamma, nEpisodes, maxEpisodeLength, \
                 minibatch = random.choices(replay_buffer, k = minibatch_size) 
                 x_batch, u_batch, cost_batch, x_next_batch = list(zip(*minibatch))  
 
-                u_batch = np.array(u_batch)
-                x_batch =  np.concatenate(x_batch,axis=1)
-                xu_batch = np.append(x_batch, [u_batch],axis=0)
+                u_batch = np.asarray(u_batch)
+                x_batch =  np.concatenate([x_batch],axis=1).T
+                xu_batch = np.reshape(np.append(x_batch, u_batch),(env.state_size() + 1, minibatch_size))
 
                 u_next_batch  = np.zeros(minibatch_size)
-
                 # we now select the next action
                 for j in range(minibatch_size):
                     u_next = action_selection(exploration_prob, env, x_next_batch[j], target_model, eps_greedy=False)
                     u_next_batch[j] = u_next
                     
                 # merge state and action of next step
-                x_next_batch  = np.concatenate(x_next_batch, axis = 1)
+                x_next_batch  = np.concatenate([x_next_batch], axis = 1).T
+                xu_next_batch = np.reshape(np.append(x_next_batch, u_next_batch),(env.state_size() + 1 ,minibatch_size))
 
-                xu_next_batch = np.append(x_next_batch, [u_next_batch],axis=0)
                 cost_batch    = np.array(cost_batch)
                 cost_batch = np.reshape(cost_batch,(minibatch_size))
                 '''*** END Batch Sample step ***'''

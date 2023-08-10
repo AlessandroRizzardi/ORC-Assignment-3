@@ -9,11 +9,10 @@ def compute_V_pi_from_Q(env, model, plot_discretization=30):
     vMax = env.vMax
     dq   = 2*np.pi/plot_discretization
     dv   = 2*vMax/plot_discretization
-    nx   = env.state_size()
     
     V  = np.zeros((plot_discretization+1, plot_discretization+1))
     pi = np.zeros((plot_discretization+1, plot_discretization+1))
-    x  = np.zeros((nx, plot_discretization+1))
+    x  = np.zeros((env.state_size(), plot_discretization+1))
 
     x[0,:] = np.arange(-np.pi, np.pi + dq, dq)
     x[1,:] = np.arange(-vMax, vMax + dv, dv)
@@ -21,7 +20,7 @@ def compute_V_pi_from_Q(env, model, plot_discretization=30):
     for q in range(plot_discretization+1):
         for v in range(plot_discretization+1):
 
-            xu      = np.reshape([x[0,q] * np.ones(env.nu), x[1,v] * np.ones(env.nu), np.arange(env.nu)], (nx + 1, env.nu))
+            xu      = np.reshape([x[0,q] * np.ones(env.nu), x[1,v] * np.ones(env.nu), np.arange(env.nu)], (env.state_size() + 1, env.nu))
 
             V[q,v]  = np.min(model(xu.T))
             pi[q,v] = env.d2cu(np.argmin(model(xu.T)))
@@ -55,7 +54,8 @@ def render_greedy_policy(env, model, gamma, x0=None, maxIter=90):
         costToGo += gamma_to_the_i * cost
         gamma_to_the_i *= gamma
 
-        hist_x[i,:]  = np.concatenate([x],axis=1).T
+        x = np.array([x]).T
+        hist_x[i,:]  = np.concatenate(x)
         hist_u.append(env.d2cu(u))
         hist_cost.append(cost)
 

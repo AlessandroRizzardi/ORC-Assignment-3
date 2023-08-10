@@ -24,7 +24,8 @@ def action_selection(exploration_prob, env, x, model, eps_greedy=True): # action
     if(uniform() < exploration_prob and eps_greedy):
         u  = randint(0, env.nu)
     else: # otherwise take a greedy control
-        xu = np.append(x*np.ones(env.nu),[np.arange(env.nu)],axis=0)
+        x = np.array([x]).T   # x = np.array([x]).T
+        xu = np.reshape([np.append([x]*np.ones(env.nu),[np.arange(env.nu)])],(env.state_size() + 1 , env.nu))
         u  = np.argmin(model(xu.T))
     return u
 

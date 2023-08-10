@@ -12,12 +12,12 @@ if __name__ == '__main__':
     np.random.seed(RANDOM_SEED)
 
     ### --- Hyper paramaters
-    NEPISODES               = 50               # Number of training episodes
+    NEPISODES               = 50              # Number of training episodes
 
     NPRINT                  = 5                   # print something every NPRINT episodes
     MAX_EPISODE_LENGTH      = 100                  # Max episode length
     DISCOUNT                = 0.99                 # Discount factor 
-    PLOT                    = True                 # Plot stuff if True
+    PLOT                    = False                 # Plot stuff if True
     PLOT_TRAJ               = True                # Plot trajectories of state x and control input u together with the history of the cost
     BATCH_SIZE              = 32                   # size of the batch for replay buffer
     MIN_BUFFER              = 100                  # lower bound as start for sampling from buffer
@@ -70,7 +70,7 @@ if __name__ == '__main__':
         Time = round((end-start)/60,3)
         print("Training time:",Time)
 
-        x,V,pi = compute_V_pi_from_Q(env, model, 20)
+        x,V,pi = compute_V_pi_from_Q(env, model, state_discretization_plot)
         env.plot_V_table(V,x[0],x[1])
         env.plot_policy(pi,x[0],x[1])
 

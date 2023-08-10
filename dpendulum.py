@@ -24,6 +24,8 @@ class DPendulum:
     
     def state_size(self):
         return self.pendulum.nx
+    def control_size(self):
+        return self.pendulum.nu
 
     # Continuous to discrete    
     def c2du(self, u): #joint torques saturation
