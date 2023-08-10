@@ -4,8 +4,8 @@ Implementation of the Deep Q Learning algorithm for a single/double pendulum
 from tensorflow.python.ops.numpy_ops import np_config
 import matplotlib.pyplot as plt
 import random
-from auxiliary_func import *
-from collections import deque
+from network_utils import *
+from plot_utils import *
 np_config.enable_numpy_behavior()
       
 def dqn(env, gamma, nEpisodes, maxEpisodeLength, \
@@ -119,10 +119,7 @@ def dqn(env, gamma, nEpisodes, maxEpisodeLength, \
         # update the exploration probability with an exponential decay: 
         # eps = exp(-decay*episode)
         exploration_prob = max(min_exploration_prob, np.exp(-exploration_decreasing_decay * k))
-        elapsed_time = round((time.time() - start), 3)
-
-        #if not k % nprint:
-        #   print('Episode #%d done with cost %d and %.1f exploration prob' % (k, J, 100*exploration_prob))            
+        elapsed_time = round((time.time() - start), 3)            
 
         # use the function compute_V_pi_from_Q(env, Q) to compute and plot V and pi
         if(k % nprint == 0):
@@ -130,11 +127,11 @@ def dqn(env, gamma, nEpisodes, maxEpisodeLength, \
             print("Deep Q learning - Episode %d duration %.1f [s], Eps = %.1f, J = %.1f " % (k, elapsed_time, round(100*exploration_prob, 3), J) )
             if(k >= nprint):
                 hist_x, hist_u, hist_cost = render_greedy_policy(env, model, 0, None, maxEpisodeLength)
-                if(plot):
+                if(PLOT):
                     time_vec = np.linspace(0.0, maxEpisodeLength * env.pendulum.DT, maxEpisodeLength)
                     trajectories(time_vec, hist_x, hist_u, hist_cost, env)
                     plt.show()
-            if(plot and env.nbJoint == 1):
+            if(PLOT and env.nbJoint == 1):
                 x, V, pi = compute_V_pi_from_Q(env, model, 20)
                 env.plot_V_table(V, x[0], x[1])
                 env.plot_policy(pi, x[0], x[1])

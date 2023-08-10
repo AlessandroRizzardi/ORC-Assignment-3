@@ -1,12 +1,7 @@
 from dpendulum import DPendulum
 from dqn import dqn
-import tensorflow as tf
-from tensorflow.python.ops.numpy_ops import np_config
-import matplotlib.pyplot as plt 
-import numpy as np
-import time
-from auxiliary_func import get_critic, trajectories, render_greedy_policy
-np_config.enable_numpy_behavior()
+from network_utils import *
+from plot_utils import *
 
 if __name__ == '__main__':
 
@@ -46,6 +41,10 @@ if __name__ == '__main__':
     
     # ----- FLAG to TRAIN/LOAD
     TRAINING                        = True # False = Load Model
+
+    
+    
+    # creation of pendulum environment
     env = DPendulum(nbJoint, nu)
 
     # Creation of the Deep Q-Network models (create critic and target NNs)
@@ -53,21 +52,25 @@ if __name__ == '__main__':
     target_model = get_critic(NX, NU)                                  # Target network
     target_model.set_weights(model.get_weights())
     optimizer = tf.keras.optimizers.Adam(QVALUE_LEARNING_RATE) # optimizer specifying the learning rates
-    #model.summary()
     
     if(TRAINING == True):
         print("\n\n\n###############################################")
         print("*** DEEP Q LEARNING ***")
         print("###############################################\n\n")
 
-        start = time.time()  
+        start = time.time() #start training time
+
+        #Deep-Q_Network algorithm  
         h_ctg = dqn(env, DISCOUNT, NEPISODES, MAX_EPISODE_LENGTH,\
                     exploration_prob, model, target_model, MIN_BUFFER,\
                     BATCH_SIZE, optimizer,NETWORK_UPDATE_STEP, min_exploration_prob ,\
                     exploration_decreasing_decay , PLOT, NPRINT )
-        end = time.time()
+        
+        end = time.time() #end training time
         Time = round((end-start)/60,3)
         print("Training time:",Time)
+
+
         
 
      # save model and weights
@@ -87,7 +90,7 @@ if __name__ == '__main__':
 
     if(TRAINING == False): #load model
         print("\n\n\n###############################################")
-        print("*** SAVING WEIGHTS FOR DEEP Q LEARNING ***")
+        print("*** LOADING WEIGHTS FOR DEEP Q LEARNING ***")
         print("###############################################\n\n")
               
         print("Load NN weights from file\n")
@@ -105,8 +108,6 @@ if __name__ == '__main__':
 
     plt.show()
         
-    #for i in range(20):
-    #    render_greedy_policy(env,model,DISCOUNT)
 
 
 
