@@ -3,6 +3,10 @@ from tensorflow import keras
 from tensorflow.python.ops.numpy_ops import np_config
 import numpy as np
 import time
+import matplotlib.pyplot as plt
+from numpy.random import randint, uniform
+
+np_config.enable_numpy_behavior()
 
 '''*** AUXILIARY FUNCTION (1) *** '''
 def dyn_forNbigger_thanOne(env, u):
@@ -12,21 +16,22 @@ def dyn_forNbigger_thanOne(env, u):
     else: x_next, cost = env.step([u])
     
     return x_next, cost
-'''*** END AUXILIARY FUNCTION (1)*** '''
+'''*** END AUXILIARY FUNCTION (1) *** '''
 
 '''*** AUXILIARY FUNCTION (2) *** '''
 def action_selection(exploration_prob, env, x, model, eps_greedy=True): # action_selection for epsilon-greedy policy
     # with probability exploration_prob we take a random control input
-    if(np.random.uniform() < exploration_prob and eps_greedy):
-        u  = np.random.randint(0, env.nu)
+    if(uniform() < exploration_prob and eps_greedy):
+        u  = randint(0, env.nu)
     else: # otherwise take a greedy control
+
         xu = np.append(x*np.ones(env.nu),[np.arange(env.nu)],axis=0)
         u  = np.argmin(model(xu.T))
     return u
 ''' *** END AUXILIARY FUNCTION (2) *** '''
 
-'''*** AUXILIARY FUNCTION (3)***'''
-def update(xu_batch, cost_batch, xu_next_batch, Q, Q_target,DISCOUNT,optimizer):
+'''*** AUXILIARY FUNCTION (3) ***'''
+def update(xu_batch, cost_batch, xu_next_batch, Q, Q_target, DISCOUNT, optimizer):
     ''' Update the weights of the Q network using the specified batch of data '''
     # all inputs are tf tensors
     with tf.GradientTape() as tape:         
@@ -44,22 +49,22 @@ def update(xu_batch, cost_batch, xu_next_batch, Q, Q_target,DISCOUNT,optimizer):
     Q_grad = tape.gradient(Q_loss, Q.trainable_variables)          
     # Update the critic backpropagating the gradients
     optimizer.apply_gradients(zip(Q_grad, Q.trainable_variables)) 
-'''*** END AUXILIARY FUNCTION (3)***'''
+'''*** END AUXILIARY FUNCTION (3) ***'''
 
-'''*** AUXILIARY FUNCTION (4)***'''
+'''*** AUXILIARY FUNCTION (4) ***'''
 def np2tf(y):
     ''' convert from numpy to tensorflow '''
     out = tf.expand_dims(tf.convert_to_tensor(y), 0).T
     return out
-'''*** END AUXILIARY FUNCTION (4)***'''
+'''*** END AUXILIARY FUNCTION (4) ***'''
     
-'''*** AUXILIARY FUNCTION (5)***'''
+'''*** AUXILIARY FUNCTION (5) ***'''
 def tf2np(y):
     ''' convert from tensorflow to numpy '''
     return tf.squeeze(y).numpy()
-'''*** END AUXILIARY FUNCTION (5)***'''
+'''*** END AUXILIARY FUNCTION (5) ***'''
 
-'''*** AUXILIARY FUNCTION (6)***'''
+'''*** AUXILIARY FUNCTION (6) ***'''
 def compute_V_pi_from_Q(env, model, plot_discretization=30):
     ''' Compute Value table and greedy policy pi from Q table. '''
     
@@ -77,14 +82,16 @@ def compute_V_pi_from_Q(env, model, plot_discretization=30):
                        
     for q in range(plot_discretization+1):
         for v in range(plot_discretization+1):
+
             xu      = np.reshape([x[0,q] * np.ones(env.nu), x[1,v] * np.ones(env.nu), np.arange(env.nu)], (nx + 1, env.nu))
+
             V[q,v]  = np.min(model(xu.T))
             pi[q,v] = env.d2cu(np.argmin(model(xu.T)))
             
     return x, V, pi
-'''*** END AUXILIARY FUNCTION (6)***'''
+'''*** END AUXILIARY FUNCTION (6) ***'''
 
-'''*** AUXILIARY FUNCTION (7)***'''
+'''*** AUXILIARY FUNCTION (7) ***'''
 def get_critic(nx, nu): 
     ''' Create the neural network to represent the Q function '''
     inputs = keras.layers.Input(shape=(nx+nu,))
@@ -97,15 +104,15 @@ def get_critic(nx, nu):
     model = tf.keras.Model(inputs, outputs) # creates the NN
 
     return model
-'''*** END AUXILIARY FUNCTION (7)***'''
+'''*** END AUXILIARY FUNCTION (7) ***'''
 
-'''*** AUXILIARY FUNCTION (8)***'''
-def render_greedy_policy(env, model, target_model, gamma, x0=None, maxIter=90):
+'''*** AUXILIARY FUNCTION (8) corrected ***'''
+def render_greedy_policy(env, model, gamma, x0=None, maxIter=90):
     ''' ***** render_greedy_policy *****
     Simulates the system using the policy I just computed:
     render_greedy_policy initializes the pendulum with a random initial state and then
     simulates it with the policy we computed
-    '''
+    We roll-out from random state using greedy policy  '''
     x0 = env.reset(x0)
     x = x0
     costToGo = 0.0
@@ -120,7 +127,7 @@ def render_greedy_policy(env, model, target_model, gamma, x0=None, maxIter=90):
 
     for i in range(maxIter):
         '''# selecting policy using ϵ-greedy strategy (ϵ-greedy policy)' or random innput'''     
-        u = action_selection(0, env, x, model, target_model)
+        u = action_selection(0, env, x, model)
         
         x, cost = dyn_forNbigger_thanOne(env, u)
 
@@ -137,4 +144,69 @@ def render_greedy_policy(env, model, target_model, gamma, x0=None, maxIter=90):
 
     return hist_x, hist_u, hist_cost
 
-'''*** END AUXILIARY FUNCTION (8)***'''
+
+'''*** END AUXILIARY FUNCTION (8) ***'''
+
+'''*** AUXILIARY FUNCTION (9) ***'''
+def trajectories(time_vec, hist_x, hist_u, hist_cost, env):
+    figure, axes = plt.subplots(6,1)
+
+    ax = axes[0]
+    ax.plot(time_vec, hist_cost, "o--", linewidth = 2)
+    ax.set_xlabel("Time [s]")
+    ax.set_ylabel("Cost")
+    ax.set_title('Cost history')
+
+    ax = axes[1]
+    ax.plot(time_vec, hist_u, "c--", linewidth = 2)
+    ax.set_xlabel("Time [s]")
+    ax.set_ylabel("Torque [Nm]")
+    ax.set_title('Torque input history') 
+    
+    conta = 0
+    if(env.uMax):
+        ax = axes[2]
+        ax.plot(time_vec, env.uMax*np.ones(len(time)), "m..", alpha=0.8, linewidth=1.5)
+        ax.plot(time_vec, -env.uMax*np.ones(len(time)), "m..", alpha=0.8, linewidth=1.5)
+        ax.set_xlabel("Time [s]")
+        ax.set_ylabel("Torque [Nm]")
+        ax.set_title('Torque input saturation limits') 
+        conta += 1
+
+    if(conta == 1): ax = axes[3]
+    else: ax = axes[2]
+    
+    conta = 0
+    ax.plot(time_vec, hist_x[:,0], "r--", linewidth = 2)
+    ax.set_xlabel("Time [s]")
+    ax.set_ylabel("Position of joint #1 [rad]")
+    ax.set_title('Joint #1 position history') 
+    if(env.nbJoint == 2):
+        ax = axes[4]
+        ax.plot(time_vec, hist_x[:,1], "o--", linewidth = 2)
+        ax.set_xlabel("Time [s]")
+        ax.set_ylabel("Position of joint #2 [rad]")
+        ax.set_title('Joint #2 position history') 
+        conta += 1
+    
+    if(conta == 1): ax = axes[5]
+    else: ax = axes[4]
+    
+    conta = 0
+    
+    if(env.nbJoint == 1):
+        ax.plot(time_vec, hist_x[:,1],'b--')
+    else:
+        ax.plot(time_vec, hist_x[:,2],'y--')
+        ax.set_xlabel('Time [s]')
+        ax.set_ylabel('[rad/s]')
+        ax.set_title("Joint #1 angular velocity")
+        ax = axes[6]
+        ax.plot(time_vec, hist_x[:,3],'r--')
+        ax.set_xlabel('Time [s]')
+        ax.set_ylabel('[rad/s]')
+        ax.set_title("Joint #2 angular velocity")
+        
+    figure.suptitle("Episode data")
+    plt.show()
+'''*** END AUXILIARY FUNCTION (9) ***'''

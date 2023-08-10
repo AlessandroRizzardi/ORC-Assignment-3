@@ -11,7 +11,7 @@ class DPendulum:
         Guassian noise can be added in the dynamics. 
         Cost is -1 if the goal state has been reached, zero otherwise.
     '''
-    def __init__(self, nbJoint = 1, nu=11, vMax=5, uMax=5, dt=0.2, ndt=1, noise_stddev=0):
+    def __init__(self, nbJoint = 1, nu=11, vMax=5, uMax=5, dt=0.05, ndt=1, noise_stddev=0):
         self.pendulum = Pendulum(nbJoint, vMax, uMax, noise_stddev)
         self.pendulum.DT  = dt      # discrete-time step
         self.pendulum.NDT = ndt     # integration method step
@@ -49,8 +49,8 @@ class DPendulum:
 
     def dynamics(self, x, iu): 
         u   = self.d2cu(iu)
-        self.xc,cost = self.pendulum.step(u)
-        return self.xc,cost
+        self.x, cost = self.pendulum.step(u)
+        return self.x, cost
     
     def plot_V_table(self, V, q, dq): 
         ''' Plot the given Value table V '''
