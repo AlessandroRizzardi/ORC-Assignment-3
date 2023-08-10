@@ -5,7 +5,7 @@ from tensorflow.python.ops.numpy_ops import np_config
 import matplotlib.pyplot as plt 
 import numpy as np
 import time
-from auxiliary_func import dyn_forNbigger_thanOne, get_critic, update, action_selection, np2tf, tf2np, trajectories, compute_V_pi_from_Q, render_greedy_policy
+from auxiliary_func import get_critic, trajectories, render_greedy_policy
 np_config.enable_numpy_behavior()
 
 if __name__ == '__main__':
@@ -22,7 +22,7 @@ if __name__ == '__main__':
     MAX_EPISODE_LENGTH      = 100                  # Max episode length
     DISCOUNT                = 0.99                 # Discount factor 
     PLOT                    = True                 # Plot stuff if True
-    PLOT_TRAJ               = True                 # Plot trajectories of state x and control input u together with the history of the cost
+    PLOT_TRAJ               = False                # Plot trajectories of state x and control input u together with the history of the cost
     BATCH_SIZE              = 32                   # size of the batch for replay buffer
     MIN_BUFFER              = 100                  # lower bound as start for sampling from buffer
     
