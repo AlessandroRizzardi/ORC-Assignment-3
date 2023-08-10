@@ -172,12 +172,14 @@ class Pendulum:
             M   = self.data.M
             b   = self.data.nle
             a = np.dot(inv(M),(u-self.Kf*v-b))
-
             a   = a.reshape(self.nv) + np.random.randn(self.nv)*self.noise_stddev
             self.a = a
 
             q    += (v+0.5*DT*a)*DT
             v    += a*DT
+            
+            #we can try to set different weights for the cost function to get 
+            #different results for the final report
             cost += (sumsq(q) + 1e-1*sumsq(v) + 1e-3*sumsq(u))*DT # cost function
 
             if display:

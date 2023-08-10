@@ -29,7 +29,7 @@ class DPendulum:
 
     # Continuous to discrete    
     def c2du(self, u): #joint torques saturation
-        u = np.clip(u,-self.uMax+1e-3,self.uMax-1e-3)
+        u = np.clip(u,-self.uMax,self.uMax)
         return int(np.floor((u+self.uMax)/self.DU))
     
     # Discrete to continuous
@@ -62,7 +62,7 @@ class DPendulum:
         plt.title("V table")
         plt.xlabel("q")
         plt.ylabel("dq")
-        plt.show()
+        plt.show(block=False) #prova a runnarlo così se no togli pure
         
     def plot_policy(self, policy, q, dq): 
         ''' Plot the given policy table pi '''
@@ -72,4 +72,4 @@ class DPendulum:
         plt.title("Policy table")
         plt.xlabel("q")
         plt.ylabel("dq")
-        plt.show()
+        plt.show(block=False) #prova a runnarlo così se no togli pure
