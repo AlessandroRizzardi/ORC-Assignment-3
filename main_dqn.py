@@ -2,7 +2,6 @@ from dpendulum import DPendulum
 from dqn import dqn
 from network_utils import *
 from plot_utils import *
-
 import numpy as np
 from numpy.random import randint, uniform
 import matplotlib.pyplot as plt
