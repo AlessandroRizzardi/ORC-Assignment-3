@@ -12,7 +12,7 @@ def compute_V_pi_from_Q(env, model, plot_discretization=30):
     
     V  = np.zeros((plot_discretization+1, plot_discretization+1))
     pi = np.zeros((plot_discretization+1, plot_discretization+1))
-    x  = np.zeros((env.state_size(), plot_discretization+1))
+    x  = np.zeros((env.state_size(), plot_discretization+1)) # np.empty
 
     x[0,:] = np.arange(-np.pi, np.pi + dq, dq)
     x[1,:] = np.arange(-vMax, vMax + dv, dv)
@@ -21,7 +21,6 @@ def compute_V_pi_from_Q(env, model, plot_discretization=30):
         for v in range(plot_discretization+1):
 
             xu      = np.reshape([x[0,q] * np.ones(env.nu), x[1,v] * np.ones(env.nu), np.arange(env.nu)], (env.state_size() + 1, env.nu))
-
             V[q,v]  = np.min(model(xu.T))
             pi[q,v] = env.d2cu(np.argmin(model(xu.T)))
             
@@ -41,8 +40,8 @@ def render_greedy_policy(env, model, gamma, x0=None, maxIter=90):
     time.sleep(1) 
 
     # storing the histories over time of x, u and the cost in 3 lists
-    hist_x   = np.zeros([maxIter, env.state_size()])
-    hist_u   = []
+    hist_x    = np.zeros([maxIter, env.state_size()])
+    hist_u    = []
     hist_cost = []
 
     for i in range(maxIter):
@@ -54,50 +53,49 @@ def render_greedy_policy(env, model, gamma, x0=None, maxIter=90):
         costToGo += gamma_to_the_i * cost
         gamma_to_the_i *= gamma
 
-        x = np.array([x]).T
-        hist_x[i,:]  = np.concatenate(x)
+        env.render() 
+
+        hist_x[i,:]  = np.concatenate(np.array([x]).T)
         hist_u.append(env.d2cu(u))
         hist_cost.append(cost)
 
-        env.render() 
-
-    print("Real cost-to-go of state x0,", x0, "=", costToGo)   
-
+    print("Real cost-to-go of state x0", x0, "=", costToGo)   
     return hist_x, hist_u, hist_cost
 
 def trajectories(time_vec, hist_x, hist_u, hist_cost, env):
     
     plt.figure()
-    plt.plot(time_vec, hist_cost, "o--", linewidth = 2)
+    plt.plot(time_vec, hist_cost, "o", linewidth = 2)
     plt.xlabel("Time [s]")
     plt.ylabel("Cost")
-    plt.title('Cost')
-    
+    plt.title("Cost")
 
     plt.figure()
-    plt.plot(time_vec, hist_u, "c--", linewidth = 2)
-    plt.plot(time_vec, env.uMax*np.ones(len(time_vec)), "m--", alpha=0.8, linewidth=1.5)
-    plt.plot(time_vec, -env.uMax*np.ones(len(time_vec)), "m--", alpha=0.8, linewidth=1.5)
+    plt.plot(time_vec, hist_u, "m")
+    plt.plot(time_vec, env.uMax * np.ones(len(time_vec)), "m", alpha=0.8, linewidth=2)
+    plt.plot(time_vec, -env.uMax * np.ones(len(time_vec)), "m", alpha=0.8, linewidth=2)
     plt.xlabel("Time [s]")
     plt.ylabel("Torque [Nm]")
-    plt.title('Torque input')   
+    plt.title("Torque input")   
         
     plt.figure()
-    plt.plot(time_vec,hist_x[:,0],'b--')
+    plt.plot(time_vec, hist_x[:,0], "c")
     if(env.nbJoint == 2):
-        plt.plot(time_vec,hist_x[:,1],'r--')
+        plt.plot(time_vec, hist_x[:,1], "k")
+        plt.legend(["joint #1 position","joint #2 position"], loc = "best")
     plt.xlabel("Time [s]")
     plt.ylabel("Angle [rad]")
-    plt.title('Joints position')
+    plt.title("Joints positions")
 
     plt.figure()
     if(env.nbJoint==1):
-        plt.plot(time_vec,hist_x[:,1],'b--')
+        plt.plot(time_vec, hist_x[:,1], "g")
     else:
-        plt.plot(time_vec,hist_x[:,2],'b--')
-        plt.plot(time_vec,hist_x[:,3],'r--')
+        plt.plot(time_vec, hist_x[:,2], "b")
+        plt.plot(time_vec, hist_x[:,3], "r")
+        plt.legend(["joint #1 ang. velocity","joint #2 ang. velocity"], loc = "best")
     plt.xlabel("Time [s]")
-    plt.ylabel("Angular velocities [rad/s]")
+    plt.ylabel("Angular velocity [rad/s]")
     plt.title("Joints velocities")
 
    

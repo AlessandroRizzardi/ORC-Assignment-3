@@ -7,14 +7,14 @@ np_config.enable_numpy_behavior()
 
 def get_critic(nx, nu): 
     ''' Create the neural network to represent the Q function '''
-    inputs = keras.layers.Input(shape=(nx+nu,))
+    inputs     = keras.layers.Input(shape=(nx+nu))
     state_out1 = keras.layers.Dense(16, activation="relu")(inputs)     # hidden layer 1
     state_out2 = keras.layers.Dense(32, activation="relu")(state_out1) # hidden layer 2
     state_out3 = keras.layers.Dense(64, activation="relu")(state_out2) # hidden layer 3
     state_out4 = keras.layers.Dense(64, activation="relu")(state_out3) # hidden layer 4
-    outputs = keras.layers.Dense(1)(state_out4) 
+    outputs    = keras.layers.Dense(1)(state_out4) 
 
-    model = tf.keras.Model(inputs, outputs) # creates the NN
+    model      = tf.keras.Model(inputs, outputs)                       # creates the NN
 
     return model
 
@@ -25,14 +25,14 @@ def action_selection(exploration_prob, env, x, model, eps_greedy=True): # action
         u  = randint(0, env.nu)
     else: # otherwise take a greedy control
         x = np.array([x]).T   # x = np.array([x]).T
-        xu = np.reshape([np.append([x]*np.ones(env.nu),[np.arange(env.nu)])],(env.state_size() + 1 , env.nu))
-        u  = np.argmin(model(xu.T))
+        xu = np.reshape([np.append([x]*np.ones(env.nu), [np.arange(env.nu)])], (env.state_size() + 1, env.nu))
+        u  = np.argmin((model(xu.T)))
     return u
 
 def dyn_forNbigger_thanOne(env, u):
     # observe cost and next state
     if(env.nbJoint == 2):
-        x_next, cost = env.step([u, env.c2du(0.0)])
+        x_next, cost   = env.step([u, env.c2du(0.0)])
     else: x_next, cost = env.step([u])
     
     return x_next, cost
@@ -57,7 +57,7 @@ def update(xu_batch, cost_batch, xu_next_batch, Q, Q_target, DISCOUNT, optimizer
     optimizer.apply_gradients(zip(Q_grad, Q.trainable_variables)) 
 
 
-def tf2np(y):
+def tf2np(y): # useless for this HW
     ''' convert from tensorflow to numpy '''
     return tf.squeeze(y).numpy()
 

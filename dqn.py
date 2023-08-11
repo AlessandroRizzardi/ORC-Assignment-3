@@ -4,13 +4,15 @@ Implementation of the Deep Q Learning algorithm for a single/double pendulum
 from tensorflow.python.ops.numpy_ops import np_config
 import matplotlib.pyplot as plt
 import random
+import time
+import numpy as np
 from network_utils import *
 from plot_utils import *
 np_config.enable_numpy_behavior()
       
 def dqn(env, gamma, nEpisodes, maxEpisodeLength, \
-        exploration_prob, model , target_model, min_buffer,\
-        minibatch_size,optimizer, network_update_step,min_exploration_prob,\
+        exploration_prob, model, target_model, min_buffer,\
+        minibatch_size, optimizer, network_update_step, min_exploration_prob,\
         exploration_decreasing_decay, PLOT=False, nprint = 1000):
     ''' 
         DQN learning algorithm input parameters description:
@@ -29,10 +31,13 @@ def dqn(env, gamma, nEpisodes, maxEpisodeLength, \
         network_update_step:          number of steps used to update the model's weights
         '''
         
+    cost_hist = np.zeros(maxEpisodeLength)                    # lists to keep track of cost (for plotting)
+    hist_u    = np.zeros(maxEpisodeLength)                    # list to keep track of control input u
+    hist_x    = np.zeros([maxEpisodeLength, env.state_size()]) # list to keep track of state x
+    replay_buffer = []                                        # used for storing transitions and replaying experiences \ 
+                                                              # collected from interactions of the model with the environment
 
-    hist_cost = []                                         # lists to keep track of cost and control input u (for plotting)
-    replay_buffer = []                                      # # used for storing transitions and replaying experiences \ 
-                                                                      # collected from interactions of the model with the environment
+    hist_cost = []                                            # list to keep track of cost
     step_count = 0
 
     # for every episode
@@ -57,33 +62,33 @@ def dqn(env, gamma, nEpisodes, maxEpisodeLength, \
             x_next, cost = dyn_forNbigger_thanOne(env, u)
             
             #saving a transition into the replay_buffer  list *** Records an experience ***
-            transition = (x, u, cost, x_next) # Experience
+            transition = (x, u, cost, x_next) # Experience (S, A, R, S', A')
             replay_buffer.append(transition)
 
             # we update weight only if we have enough transitions into the buffer 
-            if(len(replay_buffer) >= min_buffer): 
+            if(len(replay_buffer) > min_buffer): # check performance & with (replay_step % 4 == 0) 
+                
                 '''*** Batch Sample step ***'''
                 # Sampling a random set of transitions of a given dimension 'minibatch_size' of experience 
                 # from replay_buffer for training the NN
                 minibatch = random.choices(replay_buffer, k = minibatch_size) 
                 x_batch, u_batch, cost_batch, x_next_batch = list(zip(*minibatch))  
+                u_next_batch  = np.zeros(minibatch_size) # np.empty
 
-                u_batch = np.asarray(u_batch)
-                x_batch =  np.concatenate([x_batch],axis=1).T
+                x_batch  = np.concatenate([x_batch],axis=1).T
+                u_batch  = np.asarray(u_batch)
                 xu_batch = np.reshape(np.append(x_batch, u_batch),(env.state_size() + 1, minibatch_size))
 
-                u_next_batch  = np.zeros(minibatch_size)
                 # we now select the next action
                 for j in range(minibatch_size):
-                    u_next = action_selection(exploration_prob, env, x_next_batch[j], target_model, eps_greedy=False)
-                    u_next_batch[j] = u_next
+                    u_next_batch[j] = action_selection(exploration_prob, env, x_next_batch[j], target_model, eps_greedy=False)
                     
                 # merge state and action of next step
                 x_next_batch  = np.concatenate([x_next_batch], axis = 1).T
-                xu_next_batch = np.reshape(np.append(x_next_batch, u_next_batch),(env.state_size() + 1 ,minibatch_size))
+                xu_next_batch = np.reshape(np.append(x_next_batch, u_next_batch),(env.state_size() + 1, minibatch_size))
 
-                cost_batch    = np.array(cost_batch)
-                cost_batch = np.reshape(cost_batch,(minibatch_size))
+                cost_batch    = np.asarray(cost_batch)
+                cost_batch    = np.reshape(cost_batch, (minibatch_size))
                 '''*** END Batch Sample step ***'''
                 
                 # CONVERSION From numpy array type to tensorflow tensor type
@@ -93,18 +98,18 @@ def dqn(env, gamma, nEpisodes, maxEpisodeLength, \
                 
                 ''' ***** Update step (optimizer with SGD) ***** '''
                 # update the weights of Q network using the provided batch of data
-                update(xu_batch_tensor, cost_batch_tensor, xu_next_batch_tensor, model, target_model, gamma ,optimizer)
+                update(xu_batch_tensor, cost_batch_tensor, xu_next_batch_tensor, model, target_model, gamma, optimizer)
                 
                 # we update periodically the target model (Q_target) weights every 
                 # or with a period of 'network_update_step' steps
                 if(step_count % network_update_step == 0): 
                     target_model.set_weights(model.get_weights())  # Update the current Q_target with the weight of Q
                 ''' ***** END Update step (optimizer with SGD) ***** '''
-            
+
             step_count += 1
-            
+                        
             #keep track of the cost to go
-            J += gamma_to_the_i * cost #cost-to-go
+            J += gamma_to_the_i * cost # cost-to-go
             gamma_to_the_i *= gamma
 
         # END EPISODE 
@@ -113,18 +118,24 @@ def dqn(env, gamma, nEpisodes, maxEpisodeLength, \
         # update the exploration probability with an exponential decay: 
         # eps = exp(-decay*episode)
         exploration_prob = max(min_exploration_prob, np.exp(-exploration_decreasing_decay * k))
-        elapsed_time = round((time.time() - start), 3)  
+        elapsed_time     = round((time.time() - start), 3)  
+
 
         #use the function compute_V_pi_from_Q(env, Q) to compute and plot V and pi
-        if(k % nprint == 0):
-        #     printing the training for each episode
+        if(k % nprint == 0 and k >= nprint):
+            # printing the training each nprint episodes
             print("Deep Q learning - Episode %d duration %.1f [s], Eps = %.1f, J = %.1f " % (k, elapsed_time, round(100*exploration_prob, 3), J) )  
-            
-            if(PLOT and env.nbJoint == 1):
-                x, V, pi = compute_V_pi_from_Q(env, model, 20)
-                env.plot_V_table(V, x[0], x[1])
-                env.plot_policy(pi, x[0], x[1])
-                print("Average/min/max Value:", np.mean(V), np.min(V), np.max(V)) # used to describe how far i am from the optimal policy and optimal value function using Deep Q learning
+            if(PLOT):
+                # plot trajectories with a zero exploration probability
+                hist_x, hist_u, cost_hist = render_greedy_policy(env, model, 0, None, maxEpisodeLength)
+                time_vec = np.linspace(0.0, maxEpisodeLength * env.pendulum.DT, maxEpisodeLength)
+                trajectories(time_vec, hist_x, hist_u, cost_hist, env)
+                plt.show()
+                if(env.nbJoint == 1):
+                    x, V, pi = compute_V_pi_from_Q(env, model, 20)
+                    env.plot_V_table(V, x[0], x[1])
+                    env.plot_policy(pi, x[0], x[1])
+                    print("Average/min/max Value:", np.mean(V), np.min(V), np.max(V)) # used to describe how far i am from the optimal policy and optimal value function using Deep Q learning
     return hist_cost
 
 
