@@ -13,5 +13,5 @@ The goal of this assignment is to implement the Deep Q-Learning algorithm with a
 5.  [main_dqn.py](https://github.com/AlessandroRizzardi/ORC-Assignment-3/tree/main/main_dqn.py): main file for the dqn algorithm applied to the environment pendulum
 6.  [network_utils.py](https://github.com/AlessandroRizzardi/ORC-Assignment-3/tree/main/network_utils.py): Contains functions for creating the NN
 7.  [plot_utils.py](https://github.com/AlessandroRizzardi/ORC-Assignment-3/tree/main/plot_utils.py): Contains functions for plotting, mainly V table, policy table and the trajectories of state and control
-8.  [saved_models](https://github.com/AlessandroRizzardi/ORC-Assignment-3/tree/main/saved_models)  : Folder containing the model's weights got after the training of the NN (to save best performance of the algorithm)
-9.  [Papers](https://github.com/AlessandroRizzardi/ORC-Assignment-3/tree/main/Papers)       : Folder containing the text, questions of the assignment and the scientific papers used for both the DQN algorithm implementation and for writing down the final report.
+8.  [saved_models](https://github.com/AlessandroRizzardi/ORC-Assignment-3/tree/main/saved_models)  : folder containing the model's weights got after the training of the NN (to save best performance of the algorithm)
+9.  [Papers](https://github.com/AlessandroRizzardi/ORC-Assignment-3/tree/main/Papers)       : folder containing the text, questions of the assignment and the scientific papers used for both the DQN algorithm implementation and for writing down the final report.
