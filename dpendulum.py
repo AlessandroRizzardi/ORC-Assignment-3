@@ -62,7 +62,7 @@ class DPendulum:
         plt.title("V table")
         plt.xlabel("q")
         plt.ylabel("dq")
-        plt.show(block=False) #prova a runnarlo così se no togli pure
+        plt.show()
         
     def plot_policy(self, policy, q, dq): 
         ''' Plot the given policy table pi '''
@@ -72,4 +72,4 @@ class DPendulum:
         plt.title("Policy table")
         plt.xlabel("q")
         plt.ylabel("dq")
-        plt.show(block=False) #prova a runnarlo così se no togli pure
+        plt.show() 

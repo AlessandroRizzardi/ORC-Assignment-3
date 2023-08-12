@@ -46,7 +46,7 @@ def dqn(env, gamma, nEpisodes, maxEpisodeLength, \
         env.reset() # reset the state to rnd value
         
         J = 0 # initialized the cost-to-go at the beginning of each episode
-        gamma_to_the_i = 1
+        gamma_i = 1
         
         start = time.time()  # time of each episode
         
@@ -106,13 +106,14 @@ def dqn(env, gamma, nEpisodes, maxEpisodeLength, \
                     target_model.set_weights(model.get_weights())  # Update the current Q_target with the weight of Q
                 ''' ***** END Update step (optimizer with SGD) ***** '''
 
-            step_count += 1
                         
             #keep track of the cost to go
-            J += gamma_to_the_i * cost # cost-to-go
-            gamma_to_the_i *= gamma
+            J += gamma_i * cost # cost-to-go
+            gamma_i *= gamma
 
+            step_count += 1
         # END EPISODE 
+        
         hist_cost.append(J)
             
         # update the exploration probability with an exponential decay: 
@@ -122,20 +123,10 @@ def dqn(env, gamma, nEpisodes, maxEpisodeLength, \
 
 
         #use the function compute_V_pi_from_Q(env, Q) to compute and plot V and pi
-        if(k % nprint == 0 and k >= nprint):
+        if(k % nprint == 0):
             # printing the training each nprint episodes
             print("Deep Q learning - Episode %d duration %.1f [s], Eps = %.1f, J = %.1f " % (k, elapsed_time, round(100*exploration_prob, 3), J) )  
-            if(PLOT):
-                # plot trajectories with a zero exploration probability
-                hist_x, hist_u, cost_hist = render_greedy_policy(env, model, 0, None, maxEpisodeLength)
-                time_vec = np.linspace(0.0, maxEpisodeLength * env.pendulum.DT, maxEpisodeLength)
-                trajectories(time_vec, hist_x, hist_u, cost_hist, env)
-                plt.show()
-                if(env.nbJoint == 1):
-                    x, V, pi = compute_V_pi_from_Q(env, model, 20)
-                    env.plot_V_table(V, x[0], x[1])
-                    env.plot_policy(pi, x[0], x[1])
-                    print("Average/min/max Value:", np.mean(V), np.min(V), np.max(V)) # used to describe how far i am from the optimal policy and optimal value function using Deep Q learning
+            
     return hist_cost
 
 

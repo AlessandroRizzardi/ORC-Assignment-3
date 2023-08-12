@@ -19,15 +19,15 @@ if __name__ == '__main__':
     np.random.seed(RANDOM_SEED)
 
     ### --- Hyper paramaters
-    NEPISODES               = 30              # Number of training episodes
-    NPRINT                  = 3               # print something every NPRINT episodes
+    NEPISODES               = 50              # Number of training episodes
+    NPRINT                  = 5               # print something every NPRINT episodes
     MAX_EPISODE_LENGTH      = 100             # Max episode length
     DISCOUNT                = 0.99            # Discount factor 
     PLOT                    = True            # Plot stuff if True
     PLOT_TRAJ               = True            # Plot trajectories of state x and control input u together with the history of the cost
-    BATCH_SIZE              = 32              # size of the batch for replay buffer
+    MINIBATCH_SIZE              = 32              # size of the batch for replay buffer
     MIN_BUFFER              = 100             # lower bound as starting point for sampling from buffer
-    # REPLAY_STEP           = 4       
+    REPLAY_STEP           = 1                 
     NETWORK_UPDATE_STEP     = 4               # how many steps taken for updating w
     QVALUE_LEARNING_RATE    = 1e-3            # alpha coefficient of Q learning algorithm
     exploration_prob                = 1       # initial exploration probability of eps-greedy policy
@@ -35,12 +35,12 @@ if __name__ == '__main__':
     min_exploration_prob            = 0.001   # minimum of exploration probability
     
     ### --- Pendulum Environment
-    NX                        = 2             # number of states
-    NU                        = 1             # number of control inputs
     nbJoint                   = 1             # joints number
     nu                        = 21            # number of discretization steps for the torque u
     state_discretization_plot = 21            # number of discretization steops for the state x
     
+    NX                        = 2*nbJoint             # number of states
+    NU                        = 1             # number of control inputs
     # ----- FLAG to TRAIN/LOAD
     TRAINING                        = True # False = Load Model
 
@@ -64,7 +64,7 @@ if __name__ == '__main__':
         # Deep-Q_Network algorithm  
         h_ctg = dqn(env, DISCOUNT, NEPISODES, MAX_EPISODE_LENGTH,\
                     exploration_prob, model, target_model, MIN_BUFFER,\
-                    BATCH_SIZE, optimizer, NETWORK_UPDATE_STEP, min_exploration_prob,\
+                    MINIBATCH_SIZE, optimizer, NETWORK_UPDATE_STEP, min_exploration_prob,\
                     exploration_decreasing_decay, PLOT, NPRINT)
         plt.show()
         
@@ -103,17 +103,22 @@ if __name__ == '__main__':
             model = tf.keras.models.load_model('saved_models/Model2')
         assert(model)
           
-    #x,V,pi = compute_V_pi_from_Q(env, model, state_discretization_plot)
-    #env.plot_V_table(V,x[0],x[1])
-    #env.plot_policy(pi,x[0],x[1])
+    if(nbJoint==1):
+        x,V,pi = compute_V_pi_from_Q(env, model, state_discretization_plot)
+        env.plot_V_table(V,x[0],x[1])
+        env.plot_policy(pi,x[0],x[1])
+        print("Average/min/max Value:", np.mean(V), np.min(V), np.max(V)) # used to describe how far i am from the optimal policy and optimal value function using Deep Q learning
 
     hist_x, hist_u, hist_cost = render_greedy_policy(env, model, DISCOUNT, None, MAX_EPISODE_LENGTH)
     
     if(PLOT_TRAJ):
-        time_vec = np.linspace(0.0, MAX_EPISODE_LENGTH * env.pendulum.DT, MAX_EPISODE_LENGTH)
-        trajectories(time_vec, hist_x, hist_u, hist_cost, env)
+        time = np.linspace(0.0, MAX_EPISODE_LENGTH * env.pendulum.DT, MAX_EPISODE_LENGTH)
+        trajectories(time, hist_x, hist_u, hist_cost, env)
 
     plt.show()
+
+    for i in range(5):
+        render_greedy_policy(env, model, DISCOUNT, None, MAX_EPISODE_LENGTH)
         
 
 

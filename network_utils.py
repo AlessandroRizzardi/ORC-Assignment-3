@@ -7,7 +7,7 @@ np_config.enable_numpy_behavior()
 
 def get_critic(nx, nu): 
     ''' Create the neural network to represent the Q function '''
-    inputs     = keras.layers.Input(shape=(nx+nu))
+    inputs     = keras.layers.Input(shape=(nx+nu,))
     state_out1 = keras.layers.Dense(16, activation="relu")(inputs)     # hidden layer 1
     state_out2 = keras.layers.Dense(32, activation="relu")(state_out1) # hidden layer 2
     state_out3 = keras.layers.Dense(64, activation="relu")(state_out2) # hidden layer 3

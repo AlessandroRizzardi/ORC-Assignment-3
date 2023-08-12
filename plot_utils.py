@@ -62,38 +62,43 @@ def render_greedy_policy(env, model, gamma, x0=None, maxIter=90):
     print("Real cost-to-go of state x0", x0, "=", costToGo)   
     return hist_x, hist_u, hist_cost
 
-def trajectories(time_vec, hist_x, hist_u, hist_cost, env):
+def trajectories(time, hist_x, hist_u, hist_cost, env):
     
     plt.figure()
-    plt.plot(time_vec, hist_cost, "o", linewidth = 2)
+    plt.plot(time, hist_cost, "--", linewidth = 2)
     plt.xlabel("Time [s]")
     plt.ylabel("Cost")
     plt.title("Cost")
 
     plt.figure()
-    plt.plot(time_vec, hist_u, "m")
-    plt.plot(time_vec, env.uMax * np.ones(len(time_vec)), "m", alpha=0.8, linewidth=2)
-    plt.plot(time_vec, -env.uMax * np.ones(len(time_vec)), "m", alpha=0.8, linewidth=2)
+    plt.plot(time, hist_u, "m")
+    plt.plot(time, env.uMax * np.ones(len(time)), "b--", alpha=0.8, linewidth=2)
+    plt.plot(time, -env.uMax * np.ones(len(time)), "b--", alpha=0.8, linewidth=2)
+    plt.ylim([-env.uMax -1, env.uMax +1])
     plt.xlabel("Time [s]")
     plt.ylabel("Torque [Nm]")
     plt.title("Torque input")   
         
     plt.figure()
-    plt.plot(time_vec, hist_x[:,0], "c")
+    plt.plot(time, hist_x[:,0], "c")
     if(env.nbJoint == 2):
-        plt.plot(time_vec, hist_x[:,1], "k")
+        plt.plot(time, hist_x[:,1], "k")
         plt.legend(["joint #1 position","joint #2 position"], loc = "best")
+    plt.ylim([-np.pi - 1,np.pi + 1])
     plt.xlabel("Time [s]")
     plt.ylabel("Angle [rad]")
     plt.title("Joints positions")
 
     plt.figure()
     if(env.nbJoint==1):
-        plt.plot(time_vec, hist_x[:,1], "g")
+        plt.plot(time, hist_x[:,1], "g")
     else:
-        plt.plot(time_vec, hist_x[:,2], "b")
-        plt.plot(time_vec, hist_x[:,3], "r")
+        plt.plot(time, hist_x[:,2], "b")
+        plt.plot(time, hist_x[:,3], "r")
         plt.legend(["joint #1 ang. velocity","joint #2 ang. velocity"], loc = "best")
+    plt.plot(time, env.vMax * np.ones(len(time)), "b--", alpha=0.8, linewidth=2)
+    plt.plot(time, -env.vMax * np.ones(len(time)), "b--", alpha=0.8, linewidth=2)
+    plt.ylim([-env.vMax-1, env.vMax+1])
     plt.xlabel("Time [s]")
     plt.ylabel("Angular velocity [rad/s]")
     plt.title("Joints velocities")
