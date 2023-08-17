@@ -101,12 +101,12 @@ def dqn(env, gamma, nEpisodes, maxEpisodeLength, \
                 ''' ***** Update step (optimizer with SGD) ***** '''
                 # update the weights of Q network using the provided batch of data
                 update(xu_batch_tensor, cost_batch_tensor, xu_next_batch_tensor, model, target_model, gamma, optimizer)
+                ''' ***** END Update step (optimizer with SGD) ***** '''
                 
                 # we update periodically the target model (Q_target) weights every 
                 # or with a period of 'network_update_step' steps
                 if(step_count % network_update_step == 0): 
                     target_model.set_weights(model.get_weights())  # Update the current Q_target with the weight of Q
-                ''' ***** END Update step (optimizer with SGD) ***** '''
 
                         
             #keep track of the cost to go
@@ -124,7 +124,6 @@ def dqn(env, gamma, nEpisodes, maxEpisodeLength, \
         elapsed_time     = round((time.time() - start), 3)  
 
 
-        #use the function compute_V_pi_from_Q(env, Q) to compute and plot V and pi
         if(episode % nprint == 0):
             # printing the training each nprint episodes
             print("Deep Q learning - Episode %d duration %.1f [s], Eps = %.1f, J = %.1f " % (episode, elapsed_time, round(100*exploration_prob, 3), J) )  
