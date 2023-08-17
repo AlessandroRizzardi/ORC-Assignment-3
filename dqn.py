@@ -18,28 +18,31 @@ def dqn(env, gamma, nEpisodes, maxEpisodeLength, \
     ''' 
         DQN learning algorithm input parameters description:
         env:                          environment
-        model:                        Q network
-        target_model:                 Q target
         gamma:                        discount factor
-        nEpisodes:                    number of episodes to be used for evaluation
+        nEpisodes:                    number of episodes used in trainig
         maxEpisodeLength:             maximum length of an episode
         exploration_prob:             initial exploration probability for epsilon-greedy policy
-        exploration_decreasing_decay: rate of exponential decay of exploration prob
+        model:                        Q network
+        target_model:                 Q target
+        min buffer:                   minimum amount of transitions stored before allowed model update process
+        minibatch_size:               size of the mini batch buffer
+        optimizer:                    optimizer for performing gradient descent
+        network_update_step:          number of steps used to update the target weights
         min_exploration_prob:         lower bound of exploration probability
-        compute_V_pi_from_Q:          function to compute V and pi from Q
-        plot:                         if True plot the V table every nprint iterations
+        exploration_decreasing_decay: rate of exponential decay of exploration prob
+        replay step:                  number of step used to perform a gradient descent step
+        capacity buffer:              maximum capacity of the experience replay buffer
         nprint:                       print some info every nprint iterations
-        network_update_step:          number of steps used to update the model's weights
         '''
         
-    replay_buffer = deque(maxlen=capacity_buffer)                         # used for storing transitions and replaying experiences \ 
+    replay_buffer = deque(maxlen=capacity_buffer)             # used for storing transitions and replaying experiences \ 
                                                               # collected from interactions of the model with the environment
 
     hist_cost = []                                          # list to keep track of cost
-    step_count = 0
+    step_count = 0                                          # counter of every environment step made during training
 
     # for every episode
-    for k in range(nEpisodes):
+    for episode in range(nEpisodes):
         
         env.reset() # reset the state to rnd value
         
@@ -49,7 +52,7 @@ def dqn(env, gamma, nEpisodes, maxEpisodeLength, \
         start = time.time()  # time of each episode
         
         #  START EPISODE
-        for i in range(maxEpisodeLength):
+        for step in range(maxEpisodeLength):
             
             x = env.x # env state
             
@@ -117,14 +120,14 @@ def dqn(env, gamma, nEpisodes, maxEpisodeLength, \
             
         # update the exploration probability with an exponential decay: 
         # eps = exp(-decay*episode)
-        exploration_prob = max(min_exploration_prob, np.exp(-exploration_decreasing_decay * k))
+        exploration_prob = max(min_exploration_prob, np.exp(-exploration_decreasing_decay * episode))
         elapsed_time     = round((time.time() - start), 3)  
 
 
         #use the function compute_V_pi_from_Q(env, Q) to compute and plot V and pi
-        if(k % nprint == 0):
+        if(episode % nprint == 0):
             # printing the training each nprint episodes
-            print("Deep Q learning - Episode %d duration %.1f [s], Eps = %.1f, J = %.1f " % (k, elapsed_time, round(100*exploration_prob, 3), J) )  
+            print("Deep Q learning - Episode %d duration %.1f [s], Eps = %.1f, J = %.1f " % (episode, elapsed_time, round(100*exploration_prob, 3), J) )  
             
     return hist_cost
 

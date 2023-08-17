@@ -33,7 +33,7 @@ if __name__ == '__main__':
     exploration_decreasing_decay    = 0.001    # exploration decay for exponential decreasing
     min_exploration_prob            = 0.01   # minimum of exploration probability
     
-    PLOT_TRAJ               = True            # Plot trajectories of state x and control input u together with the history of the cost
+    PLOT_TRAJ               = False            # Plot trajectories of state x and control input u together with the history of the cost
     ### --- Pendulum Environment
     nbJoint                   = 2             # joints number
     nu                        = 31           # number of discretization steps for the torque u
@@ -42,13 +42,14 @@ if __name__ == '__main__':
     NX                        = 2*nbJoint             # number of states
     NU                        = 1             # number of control inputs
     # ----- FLAG to TRAIN/LOAD
-    TRAINING                        = True # False = Load Model
+    TRAINING                        = False # False = Load Model
 
     #----- MODEL NAME FOLDER FOR SAVING PLOTS
-    model_name = "Model_double12"   # Model_#  Model_double_# 
+    # for just testint the code put "Prova" as modelname
+    model_name = "Model_double10"   # Model_#  Model_double_# 
 
     # creation of pendulum environment
-    env = DPendulum(nbJoint, nu,vMax=5,uMax=10)
+    env = DPendulum(nbJoint, nu, vMax=5,uMax=10)
 
     # Creation of the Deep Q-Network models (create critic and target NNs)
     model = get_critic(NX, NU)                                         # Q network
@@ -107,15 +108,15 @@ if __name__ == '__main__':
           
     if(nbJoint==1):
         x,V,pi = compute_V_pi_from_Q(env, model, state_discretization_plot)
-        env.plot_V_table(V,x[0],x[1],model_name)
-        env.plot_policy(pi,x[0],x[1],model_name)
+        env.plot_V_table(V,x[0],x[1],"Prova")
+        env.plot_policy(pi,x[0],x[1],"Prova")
         print("Average/min/max Value:", np.mean(V), np.min(V), np.max(V)) # used to describe how far i am from the optimal policy and optimal value function using Deep Q learning
 
     hist_x, hist_u, hist_cost = render_greedy_policy(env, model, DISCOUNT, None, MAX_EPISODE_LENGTH)
     
     if(PLOT_TRAJ):
         time = np.linspace(0.0, MAX_EPISODE_LENGTH * env.pendulum.DT, MAX_EPISODE_LENGTH)
-        trajectories(time, hist_x, hist_u, hist_cost, env,model_name)
+        trajectories(time, hist_x, hist_u, hist_cost, env,"Prova")
 
     plt.show()
 
