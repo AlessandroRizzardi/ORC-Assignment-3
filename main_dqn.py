@@ -45,11 +45,11 @@ if __name__ == '__main__':
     TRAINING                        = False # False = Load Model
 
     #----- MODEL NAME FOLDER FOR SAVING PLOTS
-    # for just testint the code put "Prova" as modelname
+    # for just testing the code for trainig put "Prova" as modelname, while to load a model insert one of the name in folder "saved models"
     model_name = "Model_double10"   # Model_#  Model_double_# 
 
     # creation of pendulum environment
-    env = DPendulum(nbJoint, nu, vMax=5,uMax=10)
+    env = DPendulum(nbJoint, nu, vMax=4,uMax=10)
 
     # Creation of the Deep Q-Network models (create critic and target NNs)
     model = get_critic(NX, NU)                                         # Q network
