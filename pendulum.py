@@ -180,8 +180,9 @@ class Pendulum:
             
             #we can try to set different weights for the cost function to get 
             #different results for the final report
-            #cost += (sumsq(q) + 1e-1*sumsq(v) + 1e-3*sumsq(u))*DT # cost function       # SINGLE PENDOLUM
-            cost += (5*sumsq(q) + 1e-3*sumsq(v) + 1e-6*sumsq(u))*DT # cost function        # DOUBLE PENDULUM
+
+            cost += (sumsq(q) + 1e-1*sumsq(v) + 1e-3*sumsq(u))*DT # cost function       # SINGLE PENDOLUM
+            #cost += (5*sumsq(q) + 1e-3*sumsq(v) + 1e-6*sumsq(u))*DT # cost function        # DOUBLE PENDULUM
 
             if display:
                 self.display(q)

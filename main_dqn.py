@@ -19,24 +19,24 @@ if __name__ == '__main__':
     np.random.seed(RANDOM_SEED)
 
     ### --- Hyper paramaters
-    NEPISODES               = 3000          # Number of training episodes
-    NPRINT                  = 5               # print something every NPRINT episodes
-    MAX_EPISODE_LENGTH      = 200            # Max episode length
+    NEPISODES               = 10         # Number of training episodes
+    NPRINT                  = 1               # print something every NPRINT episodes
+    MAX_EPISODE_LENGTH      = 100            # Max episode length
     DISCOUNT                = 0.99            # Discount factor 
-    MINIBATCH_SIZE          = 64             # size of the batch for replay buffer
-    MIN_BUFFER              = 300            # lower bound as starting point for sampling from buffer
+    MINIBATCH_SIZE          = 32             # size of the batch for replay buffer
+    MIN_BUFFER              = 50            # lower bound as starting point for sampling from buffer
     REPLAY_STEP             = 4                 
-    NETWORK_UPDATE_STEP     = 800             # how many steps taken for updating w
+    NETWORK_UPDATE_STEP     = 100             # how many steps taken for updating w
     QVALUE_LEARNING_RATE    = 1e-3            # alpha coefficient of Q learning algorithm
-    CAPACITY_BUFFER         = 20000
+    CAPACITY_BUFFER         = 200
     exploration_prob                = 1       # initial exploration probability of eps-greedy policy
-    exploration_decreasing_decay    = 0.001    # exploration decay for exponential decreasing
+    exploration_decreasing_decay    = 0.05    # exploration decay for exponential decreasing
     min_exploration_prob            = 0.01   # minimum of exploration probability
     
-    PLOT_TRAJ               = False            # Plot trajectories of state x and control input u together with the history of the cost
+    PLOT_TRAJ               = True            # Plot trajectories of state x and control input u together with the history of the cost
     ### --- Pendulum Environment
-    nbJoint                   = 2             # joints number
-    nu                        = 31           # number of discretization steps for the torque u
+    nbJoint                   = 1             # joints number
+    nu                        = 11           # number of discretization steps for the torque u
     state_discretization_plot = 41            # number of discretization steops for the state x
     
     NX                        = 2*nbJoint             # number of states
@@ -46,10 +46,11 @@ if __name__ == '__main__':
 
     #----- MODEL NAME FOLDER FOR SAVING PLOTS
     # for just testing the code for trainig put "Prova" as modelname, while to load a model insert one of the name in folder "saved models"
-    model_name = "Model_double10"   # Model_#  Model_double_# 
+    # in both  case the plot are saved in folder named "Prova"
+    model_name = "Model28"   # Model#  Model_double# 
 
     # creation of pendulum environment
-    env = DPendulum(nbJoint, nu, vMax=4,uMax=10)
+    env = DPendulum(nbJoint, nu, vMax=5,uMax=5)
 
     # Creation of the Deep Q-Network models (create critic and target NNs)
     model = get_critic(NX, NU)                                         # Q network
@@ -120,7 +121,7 @@ if __name__ == '__main__':
 
     plt.show()
 
-    for i in range(10):
+    for i in range(5):
         render_greedy_policy(env, model, DISCOUNT, None, 200)
         
 

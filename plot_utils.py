@@ -69,6 +69,7 @@ def trajectories(time, hist_x, hist_u, hist_cost, env,model_name):
     plt.xlabel("Time [s]")
     plt.ylabel("Cost")
     plt.title("Cost")
+    plt.savefig(model_name+"/Cost.png")         # Model#  Model_double#   
 
     plt.figure()
     plt.plot(time, hist_u, "m")
@@ -78,7 +79,7 @@ def trajectories(time, hist_x, hist_u, hist_cost, env,model_name):
     plt.xlabel("Time [s]")
     plt.ylabel("Torque [Nm]")
     plt.title("Torque input")   
-    plt.savefig(model_name+"/Torque.png")         # Model_#  Model_double_#   
+    plt.savefig(model_name+"/Torque.png")         # Model#  Model_double#   
         
     plt.figure()
     plt.plot(time, hist_x[:,0], "c")
@@ -90,7 +91,7 @@ def trajectories(time, hist_x, hist_u, hist_cost, env,model_name):
     plt.xlabel("Time [s]")
     plt.ylabel("Angle [rad]")
     plt.title("Joints positions")
-    plt.savefig(model_name+"/Position.png")         # Model_#  Model_double_# 
+    plt.savefig(model_name+"/Position.png")         # Model#  Model_double# 
 
     plt.figure()
     if(env.nbJoint==1):
@@ -106,7 +107,7 @@ def trajectories(time, hist_x, hist_u, hist_cost, env,model_name):
     plt.xlabel("Time [s]")
     plt.ylabel("Angular velocity [rad/s]")
     plt.title("Joints velocities")
-    plt.savefig(model_name+"/Velocity.png")         # Model_#  Model_double_# 
+    plt.savefig(model_name+"/Velocity.png")         # Model#  Model_double# 
 
    
 
