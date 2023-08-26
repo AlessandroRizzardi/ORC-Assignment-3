@@ -8,11 +8,11 @@ The goal of this assignment is to implement the Deep Q-Learning algorithm with a
 ## Description of files and folders contained in the repository
 
 ### Folders
-1.  [saved_models](https://github.com/AlessandroRizzardi/ORC-Assignment-3/tree/main/saved_models)  : Folder containing the model's weights got after the training of the NN (to save best performance of the algorithm)
+1.  [saved_models](https://github.com/AlessandroRizzardi/ORC-Assignment-3/tree/main/src/saved_models)  : Folder containing the model's weights got after the training of the NN (to save best performance of the algorithm)
 2.  [Papers](https://github.com/AlessandroRizzardi/ORC-Assignment-3/tree/main/Papers)       : Folder containing the text, questions of the assignment and the scientific papers used for both the DQN algorithm implementation and for writing down the final report.
 3. [Tests_plots](https://github.com/AlessandroRizzardi/ORC-Assignment-3/tree/main/Tests%20plots)        : Folder containing the different tests/simulations both for the single and double pendulum in order to try to get the optimal hyper-parameters for stabilizing the pendulum around the top position. 
 4. [Videos](https://github.com/AlessandroRizzardi/ORC-Assignment-3/tree/main/Videos)      : Folder containing the videos of both Single and Double Pendulum resulting in the best performance we could have been achieved.
-5. [Prova](https://github.com/AlessandroRizzardi/ORC-Assignment-3/tree/main/Prova)        : Folder containing some plots (only for plotting purposes during perfomed tests )
+5. [Prova](https://github.com/AlessandroRizzardi/ORC-Assignment-3/tree/main/src/Prova)        : Folder containing some plots (only for plotting purposes during perfomed tests )
 6. [src](https://github.com/AlessandroRizzardi/ORC-Assignment-3/tree/main/src)            : Folder containing the source code developed during the development of the DQN algorithm
 
 ### Files (source code)
